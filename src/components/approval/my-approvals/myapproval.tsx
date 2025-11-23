@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react"
 import api from "../../../lib/api"
 import { Eye, Calendar, CheckCircle, DollarSign } from "lucide-react"
 import toast, { Toaster } from "react-hot-toast"
+import { useRouter } from "next/navigation"
 
 interface LineItem {
   name?: string
@@ -55,6 +56,7 @@ export default function Myapproval() {
   const [error, setError] = useState<string | null>(null)
   const [approvals, setApprovals] = useState<ApprovalRow[]>([])
   const prevLoading = useRef<boolean>(true)
+  const router = useRouter()
 
   useEffect(() => {
     const ac = new AbortController()
@@ -243,6 +245,11 @@ export default function Myapproval() {
                     title="View request"
                     aria-label={`View request ${r.title ?? ""}`}
                     className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100"
+                    onClick={() => {
+                      if (r.id) {
+                        router.push(`/dashboards/approval/${r.id}/`)
+                      }
+                    }}
                   >
                     <Eye className="w-4 h-4 text-slate-600" />
                   </button>
