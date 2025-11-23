@@ -135,7 +135,7 @@ export default function SingleRequest({
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <RequestHeader request={request} />
+      <RequestHeader />
 
       {loading && <div className="text-sm text-slate-500">Loading…</div>}
       {error && <div className="text-sm text-rose-600">{error}</div>}

@@ -99,6 +99,14 @@ export default function StaffOverviewPage() {
     return `${cur ?? 0} / ${req}`
   }
 
+  // compact FRW: 1_000 -> Frw 1K, 1_000_000 -> Frw 1M
+  function formatFrwCompact(value: number) {
+    if (!Number.isFinite(value)) return "—"
+    const abs = Math.abs(Math.round(value))
+    if (abs >= 1_000_000) return `Frw ${Math.round(value / 1_000_000)}M`
+    if (abs >= 1_000) return `Frw ${Math.round(value / 1_000)}K`
+    return `Frw ${Math.round(value).toLocaleString()}`
+  }
   // close when clicking outside portal menu or the table
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -198,7 +206,7 @@ export default function StaffOverviewPage() {
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-3">
-             Staff Overview
+            Staff Overview
           </h1>
           <p className="text-sm text-slate-500 mt-1">Create and track your purchase requests.</p>
         </div>
@@ -265,7 +273,7 @@ export default function StaffOverviewPage() {
           </div>
           <div className="flex-1">
             <div className="text-sm md:text-base text-slate-500">Total Spent (Approved)</div>
-            <div className="text-2xl md:text-3xl font-semibold">{loading ? "—" : formatFrw(approvedTotal)}</div>
+            <div className="text-2xl md:text-3xl font-semibold">{loading ? "—" : formatFrwCompact(approvedTotal)}</div>
           </div>
         </div>
       </section>
@@ -397,28 +405,54 @@ export default function StaffOverviewPage() {
                               >
                                 <Eye className="w-4 h-4 text-slate-500" /> View
                               </Link>
-                              <Link
-                                href={`/dashboards/staff/edit/${r.id}`}
-                                onClick={() => {
-                                  setOpenMenuId(null)
-                                  setMenuAnchor(null)
-                                }}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                              >
-                                <Edit2 className="w-4 h-4 text-slate-500" /> Edit
-                              </Link>
-                              <button
-                                onClick={() => {
-                                  setOpenMenuId(null)
-                                  setMenuAnchor(null)
-                                  handleDelete(r.id)
-                                }}
-                                disabled={deletingId === r.id}
-                                className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 disabled:opacity-50"
-                              >
-                                <Trash2 className="w-4 h-4 text-rose-500" />
-                                {deletingId === r.id ? "Deleting..." : "Delete"}
-                              </button>
+                              {r.status === "APPROVED" ? (
+                                <>
+                                  <div
+                                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400 cursor-not-allowed"
+                                    title="Cannot edit an approved request"
+                                    aria-disabled="true"
+                                    tabIndex={-1}
+                                    role="button"
+                                  >
+                                    <Edit2 className="w-4 h-4 text-slate-400" /> Edit
+                                  </div>
+                                  <button
+                                    disabled
+                                    className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-slate-400 cursor-not-allowed"
+                                    title="Cannot delete an approved request"
+                                    aria-disabled="true"
+                                    tabIndex={-1}
+                                  >
+                                    <Trash2 className="w-4 h-4 text-slate-400" />
+                                    Delete
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <Link
+                                    href={`/dashboards/staff/edit/${r.id}`}
+                                    onClick={() => {
+                                      setOpenMenuId(null)
+                                      setMenuAnchor(null)
+                                    }}
+                                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                  >
+                                    <Edit2 className="w-4 h-4 text-slate-500" /> Edit
+                                  </Link>
+                                  <button
+                                    onClick={() => {
+                                      setOpenMenuId(null)
+                                      setMenuAnchor(null)
+                                      handleDelete(r.id)
+                                    }}
+                                    disabled={deletingId === r.id}
+                                    className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="w-4 h-4 text-rose-500" />
+                                    {deletingId === r.id ? "Deleting..." : "Delete"}
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </PopupMenu>
                         )}

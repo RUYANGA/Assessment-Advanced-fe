@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import Link from "next/link"
 import type { RequestItem } from "@/components/staff/overwie/services/staffService"
-import { Package, Calendar, MoreHorizontal, CheckCircle, Clock, Trash2 } from "lucide-react"
+import { Package, Calendar, CheckCircle, Clock, Trash2, Eye } from "lucide-react"
 
 type Props = {
   items: RequestItem[]
@@ -105,7 +105,7 @@ export default function RequestsList({ items, loading, onDelete, onOpen }: Props
                     className="inline-flex items-center px-2 py-1 rounded hover:bg-slate-50 text-slate-600"
                     onClick={() => onOpen?.(r.id)}
                   >
-                    <MoreHorizontal className="w-4 h-4" />
+                    <Eye className="w-4 h-4" />
                   </Link>
 
                   <button

@@ -52,7 +52,7 @@ export default function ViewRequest({ service }: { service?: ReturnType<typeof c
     }
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <RequestHeader request={request} />
+        <RequestHeader/>
         {/* requestLoading handled above with full-page skeleton */}
         {requestError && <div className="text-sm text-rose-600">{requestError}</div>}
         {!requestLoading && !request && !requestError && <div className="text-sm text-slate-500">No request selected.</div>}
@@ -129,7 +129,34 @@ export default function ViewRequest({ service }: { service?: ReturnType<typeof c
       <RequestsList
         items={items}
         loading={listLoading}
-        onDelete={async (id) => { await deleteRequest(id) }}
+        onDelete={async (id) => {
+          // find the item and guard against deleting APPROVED requests
+          const rec = items.find((it) => {
+            const maybeId = String((it as Record<string, unknown>)?.id ?? (it as Record<string, unknown>)?.request_id ?? (it as Record<string, unknown>)?.purchase_request_id ?? "")
+            return maybeId === String(id)
+          })
+
+          if (!rec) {
+            alert("Request not found. Aborting delete.")
+            return
+          }
+
+          const recObj = rec as Record<string, unknown>
+          const statusRaw = String(recObj.status ?? recObj.state ?? recObj.approval_status ?? "").trim().toUpperCase()
+          const isApprovedByStatus = statusRaw.includes("APPROV")
+          const hasApprovedFlag = Boolean(recObj.approved_by_user || recObj.approved_at || recObj.is_approved)
+          const cur = Number(recObj.current_approval_level ?? NaN)
+          const req = Number(recObj.required_approval_levels ?? recObj.required_approval_level ?? NaN)
+          const isApprovedByLevels = Number.isFinite(cur) && Number.isFinite(req) && cur >= req
+
+          if (isApprovedByStatus || hasApprovedFlag || isApprovedByLevels) {
+            alert("Cannot delete an approved request.")
+            return
+          }
+
+          if (!confirm("Delete this request? This action cannot be undone.")) return
+          await deleteRequest(id)
+        }}
         onOpen={() => {}}
       />
     </div>
