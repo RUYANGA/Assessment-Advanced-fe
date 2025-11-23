@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import api, { setAuthToken } from "@/lib/api"
 import { isAxiosError } from "axios"
 import toast from "react-hot-toast"
+import { Loader2 } from "lucide-react"
 
 
 export function LoginForm({
@@ -132,8 +133,15 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <Button className="bg-indigo-500 text-2xl hover:bg-indigo-700" type="submit" disabled={loading}>
-                  {loading ? "Logging in…" : "Login"}
+                <Button className="bg-indigo-500 text-xl hover:bg-indigo-700" type="submit" disabled={loading}>
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="animate-spin w-5 h-5" />
+                      Logging in…
+                    </span>
+                  ) : (
+                    "Login"
+                  )}
                 </Button>
                 <Button
                   variant="outline"
