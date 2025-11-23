@@ -63,7 +63,7 @@ export default function SingleRequest({
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-slate-100 rounded w-1/3" />
           <div className="bg-white border rounded shadow-sm p-6 space-y-4">
@@ -101,7 +101,7 @@ export default function SingleRequest({
   const totalToShow = Number.isFinite(safeNum(totalAmountRaw)) ? safeNum(totalAmountRaw) : computedTotal
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-8">
       <RequestHeader request={request} />
 
       {loading && <div className="text-sm text-slate-500">Loading…</div>}
@@ -109,15 +109,17 @@ export default function SingleRequest({
       {!loading && !request && !error && <div className="text-sm text-slate-500">No request selected.</div>}
 
       {request && (
-        <section className="bg-white border rounded shadow-sm p-6 space-y-6">
+        <section className="bg-white border rounded shadow-sm p-2 sm:p-4 md:p-8 space-y-3 sm:space-y-6">
           <header className="mb-4">
-           <div className="mb-2">
-              <span className="text-xs text-slate-400 font-semibold mr-2">Title:</span>
-              <h2 className="text-lg font-semibold text-slate-800 inline">{request.title ?? "Untitled request"}</h2>
-            </div>
-            <div>
-              <span className="text-xs text-slate-400 font-semibold mr-2">Description:</span>
-              <span className="text-sm text-slate-500">{request.description ?? "No description"}</span>
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
+              <div>
+                <span className="text-xs sm:text-sm text-slate-400 font-semibold mr-2">Title:</span>
+                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-800 inline">{request.title ?? "Untitled request"}</h2>
+              </div>
+              <div>
+                <span className="text-xs sm:text-sm text-slate-400 font-semibold mr-2">Description:</span>
+                <span className="text-sm sm:text-base text-slate-500">{request.description ?? "No description"}</span>
+              </div>
             </div>
             
           </header>
@@ -127,13 +129,13 @@ export default function SingleRequest({
           <div>
             <h3 className="text-sm font-medium text-slate-800 mb-3">Items</h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm table-auto border-collapse">
+              <table className="w-full text-xs sm:text-sm table-auto border-collapse">
                 <thead>
                   <tr className="text-left text-slate-500 border-b">
                     <th className="py-2 px-3">Item</th>
-                    <th className="py-2 px-3 w-28 text-right">Quantity</th>
-                    <th className="py-2 px-3 w-32 text-right">Unit price</th>
-                    <th className="py-2 px-3 w-32 text-right">Line total</th>
+                    <th className="py-2 px-3 w-20 sm:w-28 text-right">Quantity</th>
+                    <th className="py-2 px-3 w-24 sm:w-32 text-right">Unit price</th>
+                    <th className="py-2 px-3 w-24 sm:w-32 text-right">Line total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -163,7 +165,7 @@ export default function SingleRequest({
             </div>
           </div>
 
-          <div className="text-sm text-slate-500">
+          <div className="text-xs sm:text-sm text-slate-500">
             {request.approved_by_user && (
               <div>
                 Approved by: <span className="text-slate-700 font-medium">{request.approved_by_user.full_name ?? request.approved_by_user.name}</span>
@@ -175,6 +177,7 @@ export default function SingleRequest({
           </div>
         </section>
       )}
+      
     </div>
   )
 }

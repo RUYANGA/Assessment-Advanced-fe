@@ -3,9 +3,11 @@ import React, { useMemo } from "react"
 // ensure path matches your folder name — project uses "overwie" in many files
 import useStaffOverview from "../overview/hooks/useStaffRequests"
 import { Eye, Calendar, Clock, CheckCircle, Trash2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function AprovalPanding() {
   const { loading, recent, refresh } = useStaffOverview()
+  const router = useRouter()
 
   const pending = useMemo(() => {
     return (recent ?? []).filter((r) => String(r.status ?? "").toUpperCase() === "PENDING")
@@ -138,6 +140,11 @@ export default function AprovalPanding() {
                       title="View request"
                       aria-label="View request"
                       className="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100"
+                      onClick={() => {
+                        if (r.id) {
+                          router.push(`/dashboards/approval/${r.id}`)
+                        }
+                      }}
                     >
                       <Eye className="w-4 h-4 text-slate-600" />
                     </button>
