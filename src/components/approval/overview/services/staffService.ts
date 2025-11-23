@@ -176,19 +176,7 @@ export function createStaffService(client: AxiosInstance = api) {
       }
     },
 
-    // delete request (helper used by UI)
-    async deleteRequest(id: number | string, token?: string): Promise<boolean> {
-      const t = toast.loading("Deleting request…")
-      try {
-        const headers = token ? { Authorization: `Bearer ${token}` } : {}
-        await client.delete(`/purchases/requests/${id}/`, { headers })
-        toast.success("Deleted", { id: t })
-        return true
-      } catch {
-        toast.error("Delete failed", { id: t })
-        return false
-      }
-    },
+  
 
     // fetch request details (returns approvals when backend includes them)
     async fetchRequest(id: number | string, token?: string): Promise<RequestItem | null> {
