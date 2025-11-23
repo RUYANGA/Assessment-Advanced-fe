@@ -24,6 +24,37 @@ export default function ApprovalOverviewPage() {
   const tableRef = useRef<HTMLDivElement | null>(null)
   const router = useRouter()
 
+  // safe helper to treat unknown values as object records
+  const toRecord = (v: unknown): Record<string, unknown> =>
+    typeof v === "object" && v !== null ? (v as Record<string, unknown>) : {}
+
+  // counts derived from fetched lists
+  const myApprovedCount = useMemo(() => {
+    return Array.isArray(mine) ? mine.filter((x) => String(x?.status ?? "").toUpperCase() === "APPROVED").length : 0
+  }, [mine])
+
+  const myRejectedCount = useMemo(() => {
+    return Array.isArray(rejectedMine) ? rejectedMine.length : 0
+  }, [rejectedMine])
+
+  // total requests = pending (for approver) + my approved + my rejected
+  const totalRequests = useMemo(() => {
+    const pending = Array.isArray(recent)
+      ? recent.filter((r) => {
+          const rec = toRecord(r)
+          const raw = toRecord(rec["_raw"])
+          const s =
+            rec["status"] ??
+            raw["status"] ??
+            raw["purchase_request_status"] ??
+            (toRecord(rec["purchase_request"])["status"] ?? toRecord(raw["purchase_request"])["status"]) ??
+            ""
+          return String(s ?? "").toUpperCase() === "PENDING"
+        }).length
+      : 0
+    return pending + myApprovedCount + myRejectedCount
+  }, [recent, myApprovedCount, myRejectedCount])
+
   function handleViewRequest(r: RequestItem | unknown) {
     const rec = (r ?? {}) as Record<string, unknown>
     const id = rec["id"] ?? rec["request_id"] ?? rec["purchase_request_id"]
@@ -207,7 +238,7 @@ export default function ApprovalOverviewPage() {
           <div className="flex-1">
             <div className="text-sm md:text-base text-slate-500">Total Requests</div>
             <div className="text-2xl md:text-3xl font-semibold">
-              {loading ? "—" : formatCompactNumber(Number(stats?.total ?? (recent ?? []).length))}
+              {loading ? "—" : formatCompactNumber(Number(totalRequests))}
             </div>
           
           </div>
@@ -232,7 +263,7 @@ export default function ApprovalOverviewPage() {
           <div className="flex-1">
             <div className="text-sm md:text-base text-slate-500">My Approved</div>
             <div className="text-2xl md:text-3xl font-semibold text-emerald-600">
-              {loading ? "—" : String(Array.isArray(mine) ? mine.filter((x) => String(x?.status ?? "").toUpperCase() === "APPROVED").length : stats?.approved ?? 0)}
+              {loading ? "—" : String(myApprovedCount)}
             </div>
         
           </div>
