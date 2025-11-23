@@ -236,44 +236,56 @@ export default function StaffOverviewPage() {
         </div>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-4 gap-6">
-        <div className="p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-4">
-          <div className="p-3 md:p-4 rounded-lg bg-slate-100">
-            <List className="w-8 h-8 md:w-10 md:h-10 text-slate-600" />
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+        <div className="p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-3 sm:gap-4">
+          <div className="p-2 sm:p-3 md:p-4 rounded-lg bg-slate-100">
+            <List className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-slate-600" />
           </div>
           <div className="flex-1">
-            <div className="text-sm md:text-base text-slate-500">Requests</div>
-            <div className="text-2xl md:text-3xl font-semibold">{loading ? "—" : stats.total}</div>
+            <div className="text-xs sm:text-sm md:text-base text-slate-500">Requests</div>
+            <div className="text-xl sm:text-2xl md:text-3xl font-semibold">{loading ? "—" : stats.total}</div>
           </div>
         </div>
 
-        <div className="p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-4">
-          <div className="p-3 md:p-4 rounded-lg bg-amber-50">
-            <Clock className="w-8 h-8 md:w-10 md:h-10 text-amber-500" />
+        <div className="p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-3 sm:gap-4">
+          <div className="p-2 sm:p-3 md:p-4 rounded-lg bg-amber-50">
+            <Clock className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-amber-500" />
           </div>
           <div className="flex-1">
-            <div className="text-sm md:text-base text-slate-500">Pending</div>
-            <div className="text-2xl md:text-3xl font-semibold text-emerald-600">{loading ? "—" : stats.pending}</div>
+            <div className="text-xs sm:text-sm md:text-base text-slate-500">Pending</div>
+            <div className="text-xl sm:text-2xl md:text-3xl font-semibold text-emerald-600">{loading ? "—" : stats.pending}</div>
           </div>
         </div>
 
-        <div className="p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-4">
-          <div className="p-3 md:p-4 rounded-lg bg-emerald-50">
-            <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-emerald-500" />
+        <div className="p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-3 sm:gap-4">
+          <div className="p-2 sm:p-3 md:p-4 rounded-lg bg-emerald-50">
+            <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-emerald-500" />
           </div>
           <div className="flex-1">
-            <div className="text-sm md:text-base text-slate-500">Approved</div>
-            <div className="text-2xl md:text-3xl font-semibold text-emerald-600">{loading ? "—" : stats.approved}</div>
+            <div className="text-xs sm:text-sm md:text-base text-slate-500">Approved</div>
+            <div className="text-xl sm:text-2xl md:text-3xl font-semibold text-emerald-600">{loading ? "—" : stats.approved}</div>
           </div>
         </div>
 
-        <div className="p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-4">
-          <div className="p-3 md:p-4 rounded-lg bg-slate-50">
-            <DollarSign className="w-8 h-8 md:w-10 md:h-10 text-slate-600" />
+
+        <div className="p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-3 sm:gap-4">
+          <div className="p-2 sm:p-3 md:p-4 rounded-lg bg-emerald-50">
+            <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-emerald-500" />
           </div>
           <div className="flex-1">
-            <div className="text-sm md:text-base text-slate-500">Total Spent (Approved)</div>
-            <div className="text-2xl md:text-3xl font-semibold">{loading ? "—" : formatFrwCompact(approvedTotal)}</div>
+            <div className="text-xs sm:text-sm md:text-base text-slate-500">Rejected</div>
+            <div className="text-xl sm:text-2xl md:text-3xl font-semibold text-emerald-600">{loading ? "—" : stats.rejected}</div>
+          </div>
+        </div>
+
+
+        <div className="p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-3 sm:gap-4">
+          <div className="p-2 sm:p-3 md:p-4 rounded-lg bg-slate-50">
+            <DollarSign className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-slate-600" />
+          </div>
+          <div className="flex-1">
+            <div className="text-xs sm:text-sm md:text-base text-slate-500">Approved</div>
+            <div className="text-xl sm:text-2xl md:text-3xl font-semibold">{loading ? "—" : formatFrwCompact(approvedTotal)}</div>
           </div>
         </div>
       </section>

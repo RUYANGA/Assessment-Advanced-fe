@@ -58,9 +58,11 @@ export function LoginForm({
       }else if (data.role == "approver1" || data.role == "approver2") {
         router.push("/dashboards/approval")
         toast.success("Login successfuly.")
-      }else{
+      }else if(data.role == "staff"){
         router.push("/dashboards/staff")
         toast.success("Login successfuly.")
+      }else{
+        toast.success("Your role is not allowed")
       }
 
 
