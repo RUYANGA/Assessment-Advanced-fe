@@ -8,8 +8,11 @@ import {
   FolderOpen,
   CheckCircle,
   FileText,
+  Trash2,
 } from "lucide-react"
 import { FinanceRequest,formatFrwCompact} from "./FinanceOverviewPage"
+import toast from "react-hot-toast"
+import api from "@/lib/api"
 
 type FinanceTableProps = {
   requests: FinanceRequest[]
@@ -28,6 +31,8 @@ export function FinanceTable({
   menuAnchor,
   PopupMenu,
 }: FinanceTableProps) {
+  const [deletingId, setDeletingId] = React.useState<number | string | null>(null)
+
   return (
     <table className="w-full text-sm table-auto">
       <thead>
@@ -124,7 +129,36 @@ export function FinanceTable({
                       >
                         <Eye className="w-4 h-4 text-slate-500" /> View
                       </Link>
-                   
+
+                      {/* only allow delete for approved requests (finance can delete approved) */}
+                      {String(r.status ?? "").toUpperCase() === "APPROVED" && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            if (!confirm("Delete this approved request? This action cannot be undone.")) return
+                            setDeletingId(r.id)
+                            try {
+                              await api.delete(`/purchases/requests/${r.id}/`)
+                              toast.success("Request deleted")
+                              setOpenMenuId(null)
+                              setMenuAnchor(null)
+                              // refresh or let parent re-fetch — simplest: reload
+                              window.location.reload()
+                            } catch (err) {
+        
+                              console.error("delete request error", err)
+                              toast.error("Failed to delete request")
+                            } finally {
+                              setDeletingId(null)
+                            }
+                          }}
+                          disabled={deletingId === r.id}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 disabled:opacity-50"
+                        >
+                          <Trash2 className="w-4 h-4 text-rose-600" /> {deletingId === r.id ? "Deleting…" : "Delete"}
+                        </button>
+                      )}
+                     
                       <Link
                         href={`/dashboards/finance/document/view-receipt/${r.id}`}
                         onClick={() => {
