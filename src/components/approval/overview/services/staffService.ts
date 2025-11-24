@@ -124,7 +124,7 @@ export function createStaffService(client: AxiosInstance = api) {
     async fetchStats(token?: string): Promise<StaffStats | null> {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
-        const res = await client.get<StaffStats>("/purchases/requests/stats/", { headers })
+        const res = await client.get<StaffStats>("/purchases/requests/", { headers })
         return res.data ?? null
       } catch {
         return null

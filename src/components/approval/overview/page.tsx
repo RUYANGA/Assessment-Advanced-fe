@@ -1,9 +1,9 @@
 "use client"
-import React, { useRef, useMemo } from "react"
+import React, { useRef, useMemo, useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import useStaffOverview from "./hooks/useStaffRequests"
-import type { RequestItem } from "./services/staffService"
+import createStaffService from "./services/staffService"
+import type { RequestItem, ApprovalEntry, StaffStats } from "./services/staffService"
 import {
   Eye,
   Trash2,
@@ -19,7 +19,101 @@ import {
 } from "lucide-react"
 
 export default function ApprovalOverviewPage() {
-  const { loading, recent, stats, refresh, mine, rejectedMine } = useStaffOverview()
+  const [loading, setLoading] = useState(true)
+  const [recent, setRecent] = useState<RequestItem[]>([])
+  const [mine, setMine] = useState<RequestItem[]>([])
+  const [rejectedMine, setRejectedMine] = useState<ApprovalEntry[]>([])
+  const [stats, setStats] = useState<StaffStats | null>(null)
+  // memoize service so it doesn't recreate every render (helps with hook deps)
+  const svc = useMemo(() => createStaffService(), [])
+
+  // track mounted state so load() can avoid setting state on unmounted component
+  const mountedRef = useRef(true)
+
+  // load data (approvals/mine, pending, stats, rejected)
+  const load = useCallback(async () => {
+    mountedRef.current = true
+    setLoading(true)
+    try {
+      const pending = await svc.fetchPending()
+      const recentApprovals = await svc.fetchRecent()
+      const mineList: RequestItem[] = []
+
+      const normalize = (p: unknown): RequestItem | null => {
+        if (!p || typeof p !== "object") return null
+        const src = (p as Record<string, unknown>).purchase_request ?? (p as Record<string, unknown>).request ?? p
+        if (!src || typeof src !== "object") return null
+        const s = src as Record<string, unknown>
+        const get = (k: string) => (s[k] === undefined ? undefined : s[k])
+
+        const id = get("id") ?? get("request_id") ?? get("purchase_request_id")
+        if (id == null) return null
+
+        const statusRaw = get("status") ?? get("purchase_request_status") ?? ""
+        const status = String(statusRaw ?? "").toUpperCase() as RequestItem["status"] | undefined
+
+        return {
+          id: id as number | string,
+          title: (get("title") ?? get("name")) as string | undefined,
+          description: (get("description") ?? get("details")) as string | undefined,
+          amount: (get("amount") ?? get("total_amount")) as number | string | undefined,
+          total_amount: get("total_amount") as number | string | undefined,
+          status: status || undefined,
+          created_at: (get("created_at") ?? get("createdAt") ?? get("created")) as string | undefined,
+          items: Array.isArray(s.items) ? (s.items as RequestItem["items"]) : [],
+          current_approval_level: typeof get("current_approval_level") === "number" ? (get("current_approval_level") as number) : Number(get("current_approval_level") ?? get("current_level") ?? NaN) || undefined,
+          required_approval_levels: typeof get("required_approval_levels") === "number" ? (get("required_approval_levels") as number) : Number(get("required_approval_levels") ?? get("required_approval_level") ?? NaN) || undefined,
+          _raw: s,
+        } as RequestItem & { _raw?: unknown }
+      }
+
+      if (Array.isArray(recentApprovals)) {
+        for (const e of recentApprovals as ApprovalEntry[]) {
+          const entry = (e.purchase_request ?? e.request ?? e) as unknown
+          const n = normalize(entry)
+          if (n) mineList.push(n)
+        }
+      } else if (recentApprovals && typeof recentApprovals === "object") {
+        const obj = recentApprovals as Record<string, unknown>
+        const candidates = ["approved_requests", "pending_requests", "approvals", "results", "data"]
+        for (const k of candidates) {
+          const val = obj[k]
+          if (Array.isArray(val)) {
+            for (const entry of val as ApprovalEntry[]) {
+              const n = normalize(entry)
+              if (n) mineList.push(n)
+            }
+          }
+        }
+      }
+
+      const rejected = await svc.fetchMineRejectedEntries()
+      const s = await svc.fetchStats()
+
+      if (!mountedRef.current) return
+      setRecent(pending)
+      setMine(mineList)
+      setRejectedMine(rejected)
+      setStats(s)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      if (mountedRef.current) setLoading(false)
+    }
+  }, [svc])
+
+  // expose refresh used by the Refresh button
+  const refresh = useCallback(() => {
+    void load()
+  }, [load])
+
+  useEffect(() => {
+    // initial load
+    void load()
+    return () => {
+      mountedRef.current = false
+    }
+  }, [load])
 
   const tableRef = useRef<HTMLDivElement | null>(null)
   const router = useRouter()
@@ -32,6 +126,8 @@ export default function ApprovalOverviewPage() {
   const myApprovedCount = useMemo(() => {
     return Array.isArray(mine) ? mine.filter((x) => String(x?.status ?? "").toUpperCase() === "APPROVED").length : 0
   }, [mine])
+
+  console.log(mine)
 
   const myRejectedCount = useMemo(() => {
     return Array.isArray(rejectedMine) ? rejectedMine.length : 0

@@ -18,6 +18,7 @@ import {
   CheckCircle,
   Clock,
   Package,
+  XCircle,
 } from "lucide-react"
 import { createPortal } from "react-dom"
 
@@ -270,7 +271,7 @@ export default function StaffOverviewPage() {
 
         <div className="p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-md flex items-center gap-3 sm:gap-4">
           <div className="p-2 sm:p-3 md:p-4 rounded-lg bg-emerald-50">
-            <CheckCircle className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-emerald-500" />
+            <XCircle className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 text-emerald-500" />
           </div>
           <div className="flex-1">
             <div className="text-xs sm:text-sm md:text-base text-slate-500">Rejected</div>

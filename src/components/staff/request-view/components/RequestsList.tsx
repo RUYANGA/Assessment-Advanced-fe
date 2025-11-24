@@ -108,22 +108,25 @@ export default function RequestsList({ items, loading, onDelete, onOpen }: Props
                     <Eye className="w-4 h-4" />
                   </Link>
 
-                  <button
-                    onClick={async () => {
-                      if (!confirm("Delete this request? This action cannot be undone.")) return
-                      setDeletingId(r.id)
-                      try {
-                        await onDelete(r.id)
-                      } finally {
-                        setDeletingId(null)
-                      }
-                    }}
-                    disabled={deletingId === r.id}
-                    className="ml-2 inline-flex items-center px-2 py-1 rounded text-rose-600 hover:bg-slate-50 disabled:opacity-50"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {/* hide delete action for already approved requests */}
+                  {r.status !== "APPROVED" && (
+                   <button
+                     onClick={async () => {
+                       if (!confirm("Delete this request? This action cannot be undone.")) return
+                       setDeletingId(r.id)
+                       try {
+                         await onDelete(r.id)
+                       } finally {
+                         setDeletingId(null)
+                       }
+                     }}
+                     disabled={deletingId === r.id}
+                     className="ml-2 inline-flex items-center px-2 py-1 rounded text-rose-600 hover:bg-slate-50 disabled:opacity-50"
+                     title="Delete"
+                   >
+                     <Trash2 className="w-4 h-4" />
+                   </button>
+                  )}
                 </div>
               </td>
             </tr>
