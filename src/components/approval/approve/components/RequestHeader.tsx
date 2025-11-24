@@ -13,6 +13,9 @@ export default function RequestHeader({ request }: { request: RequestItem | null
   const paramValues = params as Record<string, string | undefined>
   const [loading, setLoading] = useState(false)
 
+  // hide action buttons when request is already approved
+  const isApproved = String(request?.status ?? "").toUpperCase() === "APPROVED"
+
   async function handleUpdate(status: "APPROVED" | "REJECTED") {
     // prefer explicit request prop id, otherwise try URL params
     const id = request?.id ?? paramValues?.id ?? paramValues?.requestId
@@ -48,7 +51,8 @@ export default function RequestHeader({ request }: { request: RequestItem | null
           Back
         </Link>
 
-        {request || paramValues?.id || paramValues?.requestId ? (
+        {/* only show action buttons when we have an id and the request is not already approved */}
+        {(request || paramValues?.id || paramValues?.requestId) && !isApproved ? (
           <>
             <button
               type="button"

@@ -1,10 +1,15 @@
 "use client"
 import React, { useEffect, useMemo, useState } from "react"
-import { createStaffService } from "@/components/staff/overwie/services/staffService"
-import useRequestDetails from "@/components/staff/request-view/hooks/useRequestDetails"
-import MetaGrid from "@/components/staff/request-view/components/MetaGrid"
+import { createStaffService } from "@/components/approval/overview/services/staffService"
+import useRequestDetails from "@/components/approval/approve/single/hooks/useRequestDetails"
+import MetaGrid from "@/components/approval/approve/single/components/MetaGrid"
 import RequestHeader from "@/components/approval/approve/components/RequestHeader"
-import type { RequestItem } from "@/components/staff/overwie/services/staffService"
+import type { RequestItem } from "@/components/approval/overview/services/staffService"
+
+type MinimalStaffService = {
+  fetchRequest: (id: number | string, token?: string) => Promise<RequestItem | null>
+  // add other methods used by this component if any, e.g. updateRequest...
+}
 
 function safeNum(v: unknown): number {
   if (v == null || v === "") return NaN
@@ -27,9 +32,13 @@ export default function SingleRequest({
   service,
 }: {
   id?: string | null
-  service?: ReturnType<typeof createStaffService>
+  service?: MinimalStaffService
 }) {
-  const svc = useMemo(() => service ?? createStaffService(), [service])
+  // ensure svc matches the minimal interface expected by useRequestDetails
+  const svc = useMemo<MinimalStaffService>(() => {
+    return (service ?? (createStaffService() as unknown as MinimalStaffService))
+  }, [service])
+
   const [id, setId] = useState<string | null>(() => (propId ?? null))
 
   useEffect(() => {

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import api, { setAuthToken } from "@/lib/api"
 import type { LucideIcon } from "lucide-react"
-import { Users, ClipboardList, BarChart2, ShoppingCart, FileText, FilePlus, FileCheck, Archive } from "lucide-react"
+import { Users, ClipboardList, BarChart2, ShoppingCart, FileText, FilePlus } from "lucide-react"
 import { LogoutButton } from "../logout"
 
 type Role = "finance" | "approver1" |"approver2" |"staff"
@@ -28,11 +28,8 @@ const roleNav: Record<Role, Array<{ href: string; label: string; icon: LucideIco
   finance: [
     { href: "/dashboards/finance", label: "Overview", icon: BarChart2 },
     { href: "/dashboards/finance/requests", label: "Requests", icon: ClipboardList },
-    { href: "/dashboards/finance/invoices", label: "Invoices", icon: FileText },
+    { href: "/dashboards/finance/Receipt", label: "Receipts", icon: FileText },
     { href: "/dashboards/finance/purchase-orders", label: "Purchase Orders", icon: ShoppingCart },
-    { href: "/dashboards/finance/reports", label: "Reports", icon: FileText },
-    { href: "/dashboards/finance/vendors", label: "Vendors", icon: Users },
-    { href: "/dashboards/finance/audit", label: "Audit Log", icon: Archive },
   ],
 
   // approver1 and approver2 share the same approval workflow navigation
@@ -40,19 +37,13 @@ const roleNav: Record<Role, Array<{ href: string; label: string; icon: LucideIco
      { href: "/dashboards/approval", label: "Overview", icon: BarChart2 },
     { href: "/dashboards/approval/pending", label: "Pending Requests", icon: ClipboardList },
     { href: "/dashboards/approval/my-approvals", label: "My Approvals", icon: Users },
-    { href: "/dashboards/approval/reviewed", label: "Reviewed Requests", icon: FileText },
     { href: "/dashboards/approval/po", label: "Purchase Orders", icon: ShoppingCart },
-    { href: "/dashboards/approval/history", label: "Approval History", icon: FileCheck },
-    { href: "/dashboards/approval/team", label: "Team Requests", icon: Users },
   ],
   approver2: [
     { href: "/dashboards/approval", label: "Overview", icon: BarChart2 },
     { href: "/dashboards/approval/pending", label: "Pending Requests", icon: ClipboardList },
     { href: "/dashboards/approval/my-approvals", label: "My Approvals", icon: Users },
-    { href: "/dashboards/approval/reviewed", label: "Reviewed Requests", icon: FileText },
     { href: "/dashboards/approval/po", label: "Purchase Orders", icon: ShoppingCart },
-    { href: "/dashboards/approval/history", label: "Approval History", icon: FileCheck },
-    { href: "/dashboards/approval/team", label: "Team Requests", icon: Users },
   ],
 
   // staff: create & track purchase requests, submit receipts
