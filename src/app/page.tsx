@@ -1,13 +1,11 @@
+import { LoginForm } from "@/components/login-form"
 
-import Link from 'next/link'
-import React from 'react'
-
-function Home() {
+export default function Page() {
   return (
-    <div className='flex items-center justify-center text-8xl'>
-      <Link href={'/login'}>Login</Link>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <LoginForm />
+      </div>
     </div>
   )
 }
-
-export default Home
