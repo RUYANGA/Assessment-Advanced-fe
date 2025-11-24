@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Link from "next/link"
 import api from "@/lib/api"
 import {
   DollarSign,
@@ -15,6 +14,7 @@ import {
 import { DashboardCard } from "./DashboardCard"
 import { FinanceTable } from "./FinanceTable"
 import { PopupMenu } from "./PopupMenu"
+import { AxiosError } from "axios"
 
 // --- Types ---
 export type FinanceRequest = {
@@ -32,18 +32,26 @@ type Stats = {
   approved: number
 }
 
-  // compact FRW: 1_000 -> Frw 1K, 1_000_000 -> Frw 1M
-  export function formatFrwCompact(value: number) {
-    if (!Number.isFinite(value)) return "—"
-    const abs = Math.abs(Math.round(value))
-    if (abs >= 1_000_000) return `Frw ${Math.round(value / 1_000_000)}M`
-    if (abs >= 1_000) return `Frw ${Math.round(value / 1_000)}K`
-    return `Frw ${Math.round(value).toLocaleString()}`
-  }
+// compact FRW: 1_000 -> Frw 1K, 1_000_000 -> Frw 1M
+export function formatFrwCompact(value: number) {
+  if (!Number.isFinite(value)) return "—"
+  const abs = Math.abs(Math.round(value))
+  if (abs >= 1_000_000) return `Frw ${Math.round(value / 1_000_000)}M`
+  if (abs >= 1_000) return `Frw ${Math.round(value / 1_000)}K`
+  return `Frw ${Math.round(value).toLocaleString()}`
+}
+
 // --- Data Fetching ---
-async function fetchApprovedRequests(): Promise<FinanceRequest[]> {
+async function fetchAllRequests(): Promise<FinanceRequest[]> {
   const res = await api.get("/purchases/requests/")
-  return res.data.filter((r: FinanceRequest) => r.status === "APPROVED")
+  const data: unknown = res.data ?? []
+  if (Array.isArray(data)) return data as FinanceRequest[]
+  if (data && typeof data === "object") {
+    const obj = data as Record<string, unknown>
+    if (Array.isArray(obj.results)) return obj.results as FinanceRequest[]
+    if (Array.isArray(obj.data)) return obj.data as FinanceRequest[]
+  }
+  return []
 }
 
 // --- Main Page ---
@@ -55,19 +63,69 @@ export default function FinanceOverviewPage() {
   const [menuAnchor, setMenuAnchor] = useState<DOMRect | null>(null)
   const tableRef = useRef<HTMLDivElement | null>(null)
 
+  // receipts count state (declare before useEffect so setReceiptsCount is available)
+  const [receiptsCount, setReceiptsCount] = useState<number>(0)
+
   useEffect(() => {
     async function load() {
       setLoading(true)
       try {
-        const approvedRequests = await fetchApprovedRequests()
+        const all = await fetchAllRequests()
+        const approvedRequests = all.filter((r) => String(r.status ?? "").toUpperCase() === "APPROVED")
+
+        // robust receipts counting with logging + fallback paths
+        const receiptsPerRequest = await Promise.allSettled(
+          all.map(async (req) => {
+            const id = String(req.id)
+            const paths = [`/purchases/requests/${id}/receipts/`, `/purchases/requests/${id}/receipts`]
+            for (const p of paths) {
+              try {
+                const res = await api.get(p)
+                const data: unknown = res.data ?? []
+        
+                console.debug("receipts response", id, p, { status: res.status, data })
+                if (Array.isArray(data)) return data.length
+                if (data && typeof data === "object") {
+                  const obj = data as Record<string, unknown>
+                  if (typeof obj.count === "number") return obj.count
+                  if (Array.isArray(obj.results)) return obj.results.length
+                  if (Array.isArray(obj.data)) return obj.data.length
+                  // if object contains receipts key
+                  if (Array.isArray(obj.receipts)) return obj.receipts.length
+                }
+                // not recognized -> treat as zero for this path and try next path
+              } catch (err) {
+                
+                console.warn("receipts fetch failed", id, p, (err as AxiosError)?.response?.status, (err as AxiosError)?.message)
+                // try next path
+              }
+            }
+            return 0
+          })
+        )
+
+        // reduce settled results into total
+        const totalReceipts = receiptsPerRequest.reduce((sum, r) => {
+          if (r.status === "fulfilled") {
+            const v = r.value as number
+            return sum + (Number.isFinite(v) ? v : 0)
+          }
+         
+          console.warn("receipts fetch rejected", r)
+          return sum
+        }, 0)
+
         setRequests(approvedRequests)
         setStats({
-          total: approvedRequests.length,
+          total: all.length,
           approved: approvedRequests.length,
         })
-      } catch {
+        setReceiptsCount(totalReceipts)
+      } catch (err) {
         setRequests([])
         setStats({ total: 0, approved: 0 })
+       
+        console.error("FinanceOverview load error", err)
       }
       setLoading(false)
     }
@@ -137,25 +195,21 @@ export default function FinanceOverviewPage() {
           icon={<FolderOpen className="w-7 h-7 text-slate-600" />}
           label="Requests"
           value={stats.total}
-          
         />
         <DashboardCard
           icon={<CheckCircle className="w-7 h-7 text-emerald-500" />}
           label="Approved"
           value={stats.approved}
-
         />
         <DashboardCard
           icon={<Receipt className="w-7 h-7 text-amber-500" />}
           label="Receipts"
-          value="—"
-          
+          value={loading ? "—" : receiptsCount}
         />
         <DashboardCard
           icon={<FileText className="w-7 h-7 text-rose-500" />}
-          label="Invoice"
+          label="Orders"
           value="—"
-
         />
         <DashboardCard
           icon={<DollarSign className="w-7 h-7 text-slate-600" />}
@@ -173,9 +227,6 @@ export default function FinanceOverviewPage() {
           <h2 className="text-sm font-medium flex items-center gap-2">
             <Layers className="w-4 h-4 text-slate-600" /> Recent Finance Requests
           </h2>
-          <Link href="/finance/documents" className="inline-flex items-center gap-2 text-sm text-sky-700 hover:underline">
-            <FileText className="w-4 h-4" /> View Documents
-          </Link>
         </div>
         {loading ? (
           <div className="space-y-2">

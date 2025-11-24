@@ -7,7 +7,6 @@ import {
   Calendar,
   FolderOpen,
   CheckCircle,
-  Upload,
   FileText,
 } from "lucide-react"
 import { FinanceRequest,formatFrwCompact} from "./FinanceOverviewPage"
@@ -125,16 +124,7 @@ export function FinanceTable({
                       >
                         <Eye className="w-4 h-4 text-slate-500" /> View
                       </Link>
-                      <Link
-                        href={`/dashboards/finance/document/${r.id}`}
-                        onClick={() => {
-                          setOpenMenuId(null)
-                          setMenuAnchor(null)
-                        }}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-sky-700 hover:bg-slate-50"
-                      >
-                        <Upload className="w-4 h-4 text-sky-500" /> Upload Receipt/Invoice
-                      </Link>
+                   
                       <Link
                         href={`/dashboards/finance/document/view-receipt/${r.id}`}
                         onClick={() => {
