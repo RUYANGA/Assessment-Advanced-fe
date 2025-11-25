@@ -182,7 +182,7 @@ export function SignupForm({
                 Must be at least 8 characters long.
               </FieldDescription>
               <Field>
-                <Button type="submit" disabled={loading}>
+                <Button className="bg-indigo-400 hover:bg-indigo-600" type="submit" disabled={loading}>
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
                       <Loader2 className="animate-spin w-5 h-5" />
@@ -200,10 +200,7 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
+      
     </div>
   )
 }

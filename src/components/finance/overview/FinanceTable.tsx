@@ -13,6 +13,7 @@ import {
 import { FinanceRequest,formatFrwCompact} from "./FinanceOverviewPage"
 import toast from "react-hot-toast"
 import api from "@/lib/api"
+import { DeleteButton } from "@/components/deleteDialoge"
 
 type FinanceTableProps = {
   requests: FinanceRequest[]
@@ -132,31 +133,33 @@ export function FinanceTable({
 
                       {/* only allow delete for approved requests (finance can delete approved) */}
                       {String(r.status ?? "").toUpperCase() === "APPROVED" && (
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation()
-                            if (!confirm("Delete this approved request? This action cannot be undone.")) return
+                        <DeleteButton
+                          disabled={deletingId === r.id}
+                          title={`Delete approved request "${r.title ?? r.id}"`}
+                          description="This will permanently remove the approved request and its related data. This action cannot be undone."
+                          handleDelete={async () => {
                             setDeletingId(r.id)
                             try {
-                              await api.delete(`/purchases/requests/${r.id}/`)
+                              const res = await api.delete(`/purchases/requests/${r.id}/`)
+                              console.debug("DELETE response", res?.status, res?.data)
                               toast.success("Request deleted")
                               setOpenMenuId(null)
                               setMenuAnchor(null)
-                              // refresh or let parent re-fetch — simplest: reload
                               window.location.reload()
-                            } catch (err) {
-        
+                            } catch (err: unknown) {
                               console.error("delete request error", err)
-                              toast.error("Failed to delete request")
+                              const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
+                              if (anyErr?.response) {
+                                console.error("delete response", anyErr.response.status, anyErr.response.data)
+                                toast.error(`Failed to delete (${anyErr.response.status})`)
+                              } else {
+                                toast.error(String(anyErr?.message ?? "Failed to delete request"))
+                              }
                             } finally {
                               setDeletingId(null)
                             }
                           }}
-                          disabled={deletingId === r.id}
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 disabled:opacity-50"
-                        >
-                          <Trash2 className="w-4 h-4 text-rose-600" /> {deletingId === r.id ? "Deleting…" : "Delete"}
-                        </button>
+                        />
                       )}
                      
                       <Link
