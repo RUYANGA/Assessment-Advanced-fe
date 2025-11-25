@@ -8,7 +8,6 @@ import {
   FolderOpen,
   CheckCircle,
   FileText,
-  Trash2,
 } from "lucide-react"
 import { FinanceRequest,formatFrwCompact} from "./FinanceOverviewPage"
 import toast from "react-hot-toast"
@@ -135,7 +134,7 @@ export function FinanceTable({
                       {String(r.status ?? "").toUpperCase() === "APPROVED" && (
                         <DeleteButton
                           disabled={deletingId === r.id}
-                          title={`Delete approved request "${r.title ?? r.id}"`}
+                          title={`Are you sure you want to delete this request?`}
                           description="This will permanently remove the approved request and its related data. This action cannot be undone."
                           handleDelete={async () => {
                             setDeletingId(r.id)

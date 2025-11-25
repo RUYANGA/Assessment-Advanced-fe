@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Trash2 } from "lucide-react"
 import { ConfirmDialog } from "./confirm-dialog"
 
@@ -15,26 +15,36 @@ export function DeleteButton({
   description?: string
   buttonLabel?: string
 }) {
-  const baseClass = "flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-slate-50"
-  const disabledClass = disabled ? "opacity-50 pointer-events-none" : ""
+  const [localDisabled, setLocalDisabled] = useState<boolean>(false)
+
   return (
     <ConfirmDialog
       trigger={
-        <div
+        <span
           role="button"
           tabIndex={0}
-          className={`${baseClass} ${disabledClass}`}
-          aria-disabled={disabled ?? false}
+          className={`px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 rounded ${disabled || localDisabled ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}
+          aria-disabled={disabled || localDisabled}
         >
-          <Trash2 className="w-4 h-4 text-rose-600" />
-          <span>{buttonLabel}</span>
-        </div>
+          <span className="inline-flex items-center gap-2">
+            <Trash2 className="w-4 h-4" />
+            <span>{buttonLabel}</span>
+          </span>
+        </span>
       }
+      icon={<Trash2 className="w-6 h-6 text-rose-600" />}
       title={title ?? "Delete item"}
-      description={description ?? "This action cannot be undone."}
+      description={description ?? "This action will permanently remove the item and cannot be undone."}
       confirmText="Delete"
       cancelText="Cancel"
-      onConfirm={handleDelete}
+      onConfirm={async () => {
+        setLocalDisabled(true)
+        try {
+          await handleDelete()
+        } finally {
+          setLocalDisabled(false)
+        }
+      }}
     />
   )
 }
