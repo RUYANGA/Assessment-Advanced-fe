@@ -107,7 +107,61 @@ export default function PurchaseOrderList() {
         <div className="py-6 text-sm text-slate-500">No purchase orders found.</div>
       ) : (
         <div className="bg-white border rounded shadow-sm overflow-hidden">
-          <div className="overflow-x-auto table-responsive">
+          {/* Mobile: stacked cards */}
+          <div className="md:hidden space-y-3 p-4">
+            {orders.map((o) => {
+              const data: PurchaseOrderData = (o.data ?? {}) as PurchaseOrderData;
+              const pr: PurchaseRequestSummary | null = o.purchase_request ?? null;
+              const poNum = o.po_number && String(o.po_number).trim() !== "" ? o.po_number : `PO ${o.id}`;
+              const title = pr?.title ?? (data.title && String(data.title).trim() !== "" ? data.title : poNum);
+              const itemsFromData: PurchaseOrderItem[] =
+                Array.isArray(data.items) ? (data.items as PurchaseOrderItem[]) : Array.isArray(pr?.items) ? (pr!.items as PurchaseOrderItem[]) : [];
+              const itemsCount = itemsFromData.length;
+              const totalValue =
+                (data.total_amount as string | number | undefined) ??
+                (data.total as string | number | undefined) ??
+                (pr?.total_amount as string | number | undefined) ??
+                (itemsCount
+                  ? itemsFromData.reduce((s: number, it: PurchaseOrderItem) => {
+                      const q = Number(it.quantity ?? 0) || 0;
+                      const up = Number(String(it.unit_price ?? 0).replace(/,/g, "")) || 0;
+                      return s + q * up;
+                    }, 0)
+                  : undefined);
+              const generated = data.created_at ?? o.generated_at ?? pr?.created_at;
+
+              return (
+                <div key={o.id} className="bg-white rounded-md shadow-sm border p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0">
+                      <div className="font-medium text-slate-800 truncate">{title}</div>
+                      <div className="text-xs text-slate-500 mt-1">{pr ? `PR #${pr.id} — ${pr.status ?? "—"}` : poNum}</div>
+                      {itemsCount > 0 && (
+                        <div className="text-xs text-slate-500 mt-2">
+                          {itemsFromData.slice(0, 2).map((it, i) => (
+                            <span key={String(it.id ?? i)} className="inline-block mr-2">
+                              {it.name ?? `Item ${i + 1}`}
+                              {it.quantity ? ` ×${it.quantity}` : ""}
+                            </span>
+                          ))}
+                          {itemsCount > 2 && <span className="text-slate-400">+{itemsCount - 2} more</span>}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right ml-3 flex-shrink-0">
+                      <div className="text-sm font-medium">{formatAmount(totalValue)}</div>
+                      <div className="text-xs text-slate-500 mt-1">{formatDate(generated)}</div>
+                      <div className="mt-2">
+                        <Link href={`/dashboards/finance/order/${o.id}`} className="text-sm text-sky-600 hover:underline">View</Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto table-responsive">
             <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="text-left text-slate-500 border-b">
