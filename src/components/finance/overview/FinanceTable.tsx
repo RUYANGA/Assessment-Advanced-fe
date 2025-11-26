@@ -34,7 +34,32 @@ export function FinanceTable({
   const [deletingId, setDeletingId] = React.useState<number | string | null>(null)
 
   return (
-    <table className="w-full text-sm table-auto">
+    <>
+      {/* Mobile: stacked cards */}
+      <div className="md:hidden space-y-3">
+        {requests.map((r) => (
+          <div key={r.id} className="bg-white border rounded-lg p-4">
+            <div className="flex items-start justify-between">
+              <div className="min-w-0">
+                <div className="font-medium text-slate-800 truncate">{r.title}</div>
+                {r.description && (
+                  <div className="text-xs text-slate-500 mt-1 line-clamp-2">{r.description}</div>
+                )}
+                <div className="mt-3 flex items-center gap-3 text-xs text-slate-500">
+                  <span>Amount: <strong className="text-slate-900">{r.total_amount ? formatFrwCompact(Number(r.total_amount)) : "—"}</strong></span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">{r.status}</span>
+                </div>
+              </div>
+              <div className="text-right ml-3 flex-shrink-0">
+                <Link href={`/dashboards/finance/${r.id}`} className="text-sm text-sky-600 hover:underline">View</Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop/tablet: regular table */}
+      <table className="hidden md:table w-full text-sm table-auto">
       <thead>
         <tr className="text-left text-slate-500 border-b">
           <th className="py-3 px-4 min-w-[38%]">Title</th>
@@ -180,5 +205,6 @@ export function FinanceTable({
         ))}
       </tbody>
     </table>
+    </>
   )
 }
