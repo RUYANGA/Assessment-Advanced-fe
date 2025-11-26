@@ -3,6 +3,10 @@
 Professional frontend for MedLink: a lightweight purchase-request, approval and finance management UI.  
 Built with Next.js, React, TypeScript and Tailwind CSS. Integrates with a REST API for authentication, approvals and purchase order management.
 
+## Live demo
+The frontend is deployed and available at:
+- https://assessment-advanced-fe.vercel.app
+
 ## Features
 - Token-based authentication and session persistence.
 - Role-aware interfaces:
