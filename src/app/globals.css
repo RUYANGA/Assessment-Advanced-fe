@@ -159,3 +159,22 @@ img, svg { max-width: 100%; height: auto; }
 /* Improve table responsiveness when not wrapped with Tailwind utilities */
 .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* Simple, lightweight enter animation for stacked cards */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  will-change: transform, opacity;
+  animation-name: fadeInUp;
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(.22,.9,.32,1);
+  animation-fill-mode: both;
+}
+
+/* slight elevation + smooth hover for cards */
+.card-hover-smooth {
+  transition: transform 150ms var(--tw-timing-function, cubic-bezier(.4,0,.2,1)), box-shadow 150ms;
+}
+.card-hover-smooth:hover { transform: translateY(-3px); }
+

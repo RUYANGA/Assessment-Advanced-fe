@@ -21,8 +21,8 @@ export default function RequestsList({ items, loading, onDelete, onOpen }: Props
     <>
       {/* Mobile: stacked cards */}
       <div className="md:hidden space-y-3">
-        {items.map((r) => (
-          <div key={r.id} className="bg-white border rounded-lg p-4">
+        {items.map((r, idx) => (
+          <div key={r.id} className="bg-white border rounded-lg p-4 fade-in-up card-hover-smooth" style={{ animationDelay: `${idx * 45}ms` }}>
             <div className="flex items-start justify-between">
               <div className="min-w-0">
                 <div className="font-medium text-slate-800 truncate">{r.title}</div>

@@ -115,12 +115,20 @@ export default function Header({
         </button>
 
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">
-            <span className="hidden sm:inline" title={title ?? (loading ? "" : computedTitle)} aria-label={title ?? (loading ? "" : computedTitle)}>
+          <h1 className="text-lg font-semibold text-slate-900 min-w-0">
+            <span
+              className="hidden sm:inline block truncate max-w-[28ch]"
+              title={title ?? (loading ? "" : computedTitle)}
+              aria-label={title ?? (loading ? "" : computedTitle)}
+            >
               {title ?? (loading ? "" : computedTitle)}
             </span>
-            <span className="sm:hidden" title={title ?? (loading ? "" : computedTitle)} aria-label={title ?? (loading ? "" : computedTitle)}>
-              {shortTitle}
+            <span
+              className="sm:hidden block truncate max-w-[14ch]"
+              title={title ?? (loading ? "" : computedTitle)}
+              aria-label={title ?? (loading ? "" : computedTitle)}
+            >
+              {shortTitle || (title ?? (loading ? "" : computedTitle))}
             </span>
           </h1>
           <p className="text-sm text-slate-500 hidden sm:block">

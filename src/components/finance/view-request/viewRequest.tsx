@@ -94,8 +94,8 @@ export default function ViewRequest() {
         <div>
           {/* Mobile stacked cards */}
           <div className="md:hidden space-y-3">
-            {requests.map((r) => (
-              <div key={r.id} className="bg-white border rounded-lg p-4">
+            {requests.map((r, idx) => (
+              <div key={r.id} className="bg-white border rounded-lg p-4 fade-in-up card-hover-smooth" style={{ animationDelay: `${idx * 45}ms` }}>
                 <div className="flex items-start justify-between">
                   <div className="min-w-0">
                     <div className="font-medium text-slate-800 truncate">{r.title ?? `Request ${r.id}`}</div>
