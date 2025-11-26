@@ -196,5 +196,6 @@ export default function RequestsList({ items, loading, onDelete, onOpen }: Props
         </tbody>
       </table>
     </div>
+    </>
   )
 }
