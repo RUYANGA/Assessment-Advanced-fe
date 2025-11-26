@@ -23,15 +23,46 @@ export default function ViewRequest() {
       setLoading(true);
       setError(null);
       try {
-        const res = await api.get("/purchases/requests/", {
-          params: { status: "approved", ordering: "-created_at" },
-        });
-        const data = (res?.data?.results ?? res?.data) as unknown;
-        if (mounted) setRequests(Array.isArray(data) ? data : []);
+        // primary attempt with recommended query params
+        const attempts = [
+          { params: { status: "approved", ordering: "-created_at" } },
+          { params: { status: "APPROVED", ordering: "-created_at" } },
+          {}, // no params - fallback to server defaults
+        ]
+
+        let found: unknown = null
+        for (const a of attempts) {
+          try {
+            const res = await api.get("/purchases/requests/", a)
+            const payload: unknown = (res?.data?.results ?? res?.data) as unknown
+            if (Array.isArray(payload) && payload.length > 0) {
+              found = payload
+              break
+            }
+            // if server returns object with results/data arrays
+            if (payload && typeof payload === "object") {
+              const obj = payload as Record<string, unknown>
+              if (Array.isArray(obj.results) && obj.results.length > 0) {
+                found = obj.results
+                break
+              }
+              if (Array.isArray(obj.data) && obj.data.length > 0) {
+                found = obj.data
+                break
+              }
+            }
+            // nothing usable, continue to next attempt
+          } catch (err) {
+            console.debug("attempt failed for /purchases/requests/", a, err)
+            // try next attempt
+          }
+        }
+
+        if (mounted) setRequests(Array.isArray(found) ? (found as Req[]) : []);
       } catch (err: unknown) {
-        
-        console.error("Failed fetching approved requests", err);
-        if (mounted) setError("Failed to load approved requests");
+        console.error("Failed fetching approved requests", err)
+        if (mounted)
+          setError("Failed to load approved requests. Check console for details.")
       } finally {
         if (mounted) setLoading(false);
       }
