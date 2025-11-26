@@ -24,9 +24,9 @@ import { Loader2 } from "lucide-react";
 
 const DEMO_CREDENTIALS: Record<string, { email: string; password: string } | null> = {
   finance: { email: "ruyangam15@gmail.com", password: "1234" },
-  staff: { email: "ruyangamerci30@gmail.com", password: "1234" },
+  approver2: { email: "ruyangamerci30@gmail.com", password: "1234" },
   approver1: { email: "igacode15@gmail.com", password: "1234" },
-  approver2: { email: "marieireneimanishimwe@gmail.com", password: "1234" },
+  staff: { email: "marieireneimanishimwe@gmail.com", password: "1234" },
   clear: null,
 };
 
