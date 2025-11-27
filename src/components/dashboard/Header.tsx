@@ -125,7 +125,7 @@ export default function Header({
               {title ?? (loading ? "" : computedTitle)}
             </span>
             <span
-              className="sm:hidden block truncate max-w-[14ch]"
+              className="sm:hidden truncate max-w-[14ch]"
               title={title ?? (loading ? "" : computedTitle)}
               aria-label={title ?? (loading ? "" : computedTitle)}
             >
