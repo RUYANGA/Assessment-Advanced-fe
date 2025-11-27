@@ -44,9 +44,14 @@ api.interceptors.response.use(
   },
   (error) => {
     try {
-      const status = error?.response?.status
-      const url = error?.config?.url
-      console.warn("api error", { status, url })
+        const status = error?.response?.status
+        const url = error?.config?.url
+        // avoid noisy warnings for expected 404s from the optional stats endpoint
+        if (typeof url === 'string' && url.includes('/purchases/requests/stats')) {
+          console.debug('api error (stats endpoint)', { status, url })
+        } else {
+          console.warn("api error", { status, url })
+        }
     } catch (e) {}
     if (error?.response?.status === 401 && typeof window !== 'undefined') {
       // simple handling: remove token on 401 and notify user
