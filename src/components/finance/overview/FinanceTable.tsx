@@ -164,27 +164,33 @@ export function FinanceTable({
                           handleDelete={async () => {
                             setDeletingId(r.id)
                             try {
-                              // ensure we send Authorization header even if axios defaults weren't set
                               const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
                               const headers: Record<string, string> = {}
                               if (token) headers.Authorization = `Bearer ${token}`
 
                               const res = await api.delete(`/purchases/requests/${r.id}/`, { headers })
-                              console.debug("DELETE response", res?.status, res?.data, "sentHeaders", headers)
+                              console.debug("DELETE response", res?.status, res?.data)
                               toast.success("Request deleted")
                               setOpenMenuId(null)
                               setMenuAnchor(null)
-                              // refresh list after deletion
                               window.location.reload()
                             } catch (err: unknown) {
                               console.error("delete request error", err)
                               const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
                               if (anyErr?.response) {
-                                console.error("delete response", anyErr.response.status, anyErr.response.data)
-                                // show a slightly richer error if available
+                                const status = anyErr.response.status
                                 const data = anyErr.response.data as any
                                 const msg = data?.detail ?? data?.message ?? JSON.stringify(data)
-                                toast.error(`Failed to delete (${anyErr.response.status}): ${String(msg)}`)
+                                if (status === 401) {
+                                  toast.error("Unauthorized (401). Please sign in again.")
+                                  if (typeof window !== "undefined") localStorage.removeItem("token")
+                                } else if (typeof status === "number" && status >= 400 && status < 500) {
+                                  toast.error(`Failed to delete (status ${status}): ${String(msg)}`)
+                                } else if (typeof status === "number") {
+                                  toast.error(`Server error (${status}). See console for details.`)
+                                } else {
+                                  toast.error(`Failed to delete request: ${String(msg)}`)
+                                }
                               } else {
                                 toast.error(String(anyErr?.message ?? "Failed to delete request"))
                               }
