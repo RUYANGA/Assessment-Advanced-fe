@@ -42,8 +42,72 @@ export function FinanceTable({
     setLocalRequests(requests ?? [])
   }, [requests])
 
+  // Helper to perform a delete by id (reused by row DeleteButton and dev test button)
+  async function performDelete(id: number | string) {
+    console.debug("finance: performDelete", id)
+    const toastId = toast.loading("Deleting request...")
+    setDeletingId(id)
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
+      const headers: Record<string, string> = {}
+      if (token) headers.Authorization = `Bearer ${token}`
+
+      const url = `/purchases/requests/${id}/`
+      console.debug("finance: deleting url and headers", { url, headers })
+
+      const res = await api.delete(url, { headers })
+      console.debug("DELETE response", res?.status, res?.data)
+      setLocalRequests((prev) => prev.filter((it) => String(it.id) !== String(id)))
+      toast.success("Request deleted", { id: toastId })
+      setOpenMenuId(null)
+      setMenuAnchor(null)
+    } catch (err: unknown) {
+      try {
+        const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
+        console.error("performDelete error", {
+          message: anyErr?.message,
+          status: anyErr?.response?.status,
+          data: anyErr?.response?.data,
+        })
+      } catch (e) {
+        console.error("performDelete unknown error", err)
+      }
+      const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
+      if (anyErr?.response) {
+        const status = anyErr.response.status
+        const data = anyErr.response.data as any
+        const msg = data?.detail ?? data?.message ?? JSON.stringify(data)
+        if (status === 401) {
+          toast.error("Unauthorized (401). Please sign in again.", { id: toastId })
+          if (typeof window !== "undefined") localStorage.removeItem("token")
+        } else if (typeof status === "number" && status >= 400 && status < 500) {
+          toast.error(`Failed to delete (status ${status}): ${String(msg)}`, { id: toastId })
+        } else if (typeof status === "number") {
+          toast.error(`Server error (${status}). See console for details.`, { id: toastId })
+        } else {
+          toast.error(`Failed to delete request: ${String(msg)}`, { id: toastId })
+        }
+      } else {
+        toast.error(String(anyErr?.message ?? "Failed to delete request"), { id: toastId })
+      }
+    } finally {
+      setDeletingId(null)
+      toast.dismiss(toastId)
+    }
+  }
+
   return (
     <>
+      {/* Dev helper: quick-delete endpoint /purchases/requests/4/ for testing */}
+      <div className="mb-3">
+        <button
+          type="button"
+          onClick={() => performDelete(4)}
+          className="px-3 py-1 text-xs rounded bg-rose-100 text-rose-700 mr-2"
+        >
+          Dev: Delete /purchases/requests/4/
+        </button>
+      </div>
       {/* Mobile: stacked cards */}
       <div className="md:hidden space-y-3">
         {localRequests.map((r) => (
@@ -170,61 +234,7 @@ export function FinanceTable({
                           disabled={deletingId === r.id}
                           title={`Are you sure you want to delete this request?`}
                           description="This will permanently remove the approved request and its related data. This action cannot be undone."
-                          handleDelete={async () => {
-                            console.debug("finance: delete triggered", r.id)
-                            const toastId = toast.loading("Deleting request...")
-                            setDeletingId(r.id)
-                            try {
-                              const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-                              const headers: Record<string, string> = {}
-                              if (token) headers.Authorization = `Bearer ${token}`
-
-                              const url = `/purchases/requests/${r.id}/`
-                              console.debug("finance: deleting url and headers", { url, headers })
-
-                              const res = await api.delete(url, { headers })
-                              console.debug("DELETE response", res?.status, res?.data)
-                              // Optimistically remove the request from the local list so UI updates without a full reload
-                              setLocalRequests((prev) => prev.filter((it) => String(it.id) !== String(r.id)))
-                              toast.success("Request deleted", { id: toastId })
-                              setOpenMenuId(null)
-                              setMenuAnchor(null)
-                            } catch (err: unknown) {
-                              // Print richer error details to help debugging in browser console
-                              try {
-                                // some errors are Axios errors with response/data
-                                const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
-                                console.error("delete request error", {
-                                  message: anyErr?.message,
-                                  status: anyErr?.response?.status,
-                                  data: anyErr?.response?.data,
-                                })
-                              } catch (e) {
-                                console.error("delete request error (unknown shape)", err)
-                              }
-                              const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
-                              if (anyErr?.response) {
-                                const status = anyErr.response.status
-                                const data = anyErr.response.data as any
-                                const msg = data?.detail ?? data?.message ?? JSON.stringify(data)
-                                if (status === 401) {
-                                  toast.error("Unauthorized (401). Please sign in again.", { id: toastId })
-                                  if (typeof window !== "undefined") localStorage.removeItem("token")
-                                } else if (typeof status === "number" && status >= 400 && status < 500) {
-                                  toast.error(`Failed to delete (status ${status}): ${String(msg)}`, { id: toastId })
-                                } else if (typeof status === "number") {
-                                  toast.error(`Server error (${status}). See console for details.`, { id: toastId })
-                                } else {
-                                  toast.error(`Failed to delete request: ${String(msg)}`, { id: toastId })
-                                }
-                              } else {
-                                toast.error(String(anyErr?.message ?? "Failed to delete request"), { id: toastId })
-                              }
-                            } finally {
-                              setDeletingId(null)
-                              toast.dismiss(toastId)
-                            }
-                          }}
+                          handleDelete={async () => performDelete(r.id)}
                         />
                       )}
                      
