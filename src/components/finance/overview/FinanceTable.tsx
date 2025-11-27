@@ -177,15 +177,29 @@ export function FinanceTable({
                               const headers: Record<string, string> = {}
                               if (token) headers.Authorization = `Bearer ${token}`
 
-                                const res = await api.delete(`/purchases/requests/${r.id}/`, { headers })
-                                console.debug("DELETE response", res?.status, res?.data)
-                                // Optimistically remove the request from the local list so UI updates without a full reload
-                                setLocalRequests((prev) => prev.filter((it) => String(it.id) !== String(r.id)))
-                                toast.success("Request deleted", { id: toastId })
-                                setOpenMenuId(null)
-                                setMenuAnchor(null)
+                              const url = `/purchases/requests/${r.id}/`
+                              console.debug("finance: deleting url and headers", { url, headers })
+
+                              const res = await api.delete(url, { headers })
+                              console.debug("DELETE response", res?.status, res?.data)
+                              // Optimistically remove the request from the local list so UI updates without a full reload
+                              setLocalRequests((prev) => prev.filter((it) => String(it.id) !== String(r.id)))
+                              toast.success("Request deleted", { id: toastId })
+                              setOpenMenuId(null)
+                              setMenuAnchor(null)
                             } catch (err: unknown) {
-                              console.error("delete request error", err)
+                              // Print richer error details to help debugging in browser console
+                              try {
+                                // some errors are Axios errors with response/data
+                                const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
+                                console.error("delete request error", {
+                                  message: anyErr?.message,
+                                  status: anyErr?.response?.status,
+                                  data: anyErr?.response?.data,
+                                })
+                              } catch (e) {
+                                console.error("delete request error (unknown shape)", err)
+                              }
                               const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
                               if (anyErr?.response) {
                                 const status = anyErr.response.status
