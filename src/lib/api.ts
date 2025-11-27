@@ -18,7 +18,16 @@ if (typeof window !== 'undefined') {
 // Request interceptor example (optional extra logging)
 api.interceptors.request.use(
   (config) => {
-    // modify config if needed
+    // debug: log outgoing requests and whether Authorization header is present
+    try {
+      const method = config.method?.toUpperCase() ?? "UNKNOWN"
+      const url = config.url ?? ""
+      const hasAuth = !!config.headers?.Authorization || !!api.defaults.headers.common['Authorization']
+      // avoid logging the full token
+      console.debug("api request", { method, url, hasAuth })
+    } catch (e) {
+      // ignore logging errors
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -26,8 +35,18 @@ api.interceptors.request.use(
 
 // Response interceptor to handle common errors (e.g., 401)
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    try {
+      console.debug("api response", { status: res.status, url: res.config?.url })
+    } catch (e) {}
+    return res
+  },
   (error) => {
+    try {
+      const status = error?.response?.status
+      const url = error?.config?.url
+      console.warn("api error", { status, url })
+    } catch (e) {}
     if (error?.response?.status === 401 && typeof window !== 'undefined') {
       // simple handling: remove token on 401
       localStorage.removeItem('token');
