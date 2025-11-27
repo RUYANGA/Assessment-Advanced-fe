@@ -16,9 +16,8 @@ type CurrentUser = {
   created_at?: string | null
 }
 
-// NOTE: this file uses a static `user` object for demo purposes.
-// Replace with real user data / hook when integrating auth.
-const user: CurrentUser = {
+// Demo fallback user used until `/me/` returns real data.
+const demoUser: CurrentUser = {
   id: 2,
   email: "ruyangamerci30@gmail.com",
   first_name: "Merci",
@@ -28,6 +27,7 @@ const user: CurrentUser = {
 }
 
 export default function ProfilePage() {
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
   const [requestsCount, setRequestsCount] = useState<number | null>(null)
   const [approvalsCount, setApprovalsCount] = useState<number | null>(null)
   const [ordersCount, setOrdersCount] = useState<number | null>(null)
@@ -37,6 +37,25 @@ export default function ProfilePage() {
     let mounted = true
 
     async function loadCounts() {
+      // fetch current user first
+      try {
+        const meRes = await api.get("/me/")
+        const meData: unknown = meRes?.data
+        if (meData && typeof meData === "object") {
+          const obj = meData as Record<string, unknown>
+          const fetchedUser: Partial<CurrentUser> = {}
+          if (typeof obj.id === "number") fetchedUser.id = obj.id
+          if (typeof obj.email === "string") fetchedUser.email = obj.email
+          if (typeof obj.first_name === "string") fetchedUser.first_name = obj.first_name
+          if (typeof obj.last_name === "string") fetchedUser.last_name = obj.last_name
+          if (typeof obj.role === "string") fetchedUser.role = obj.role as Role
+          if (obj.created_at) fetchedUser.created_at = String(obj.created_at)
+          if (mounted) setCurrentUser(fetchedUser as CurrentUser)
+          if (mounted && fetchedUser.created_at) setCreatedAt(String(fetchedUser.created_at))
+        }
+      } catch (err) {
+        console.debug("profile: /me/ fetch failed", err)
+      }
       try {
         // Requests (user's own requests)
         let reqCount = 0
@@ -91,17 +110,6 @@ export default function ProfilePage() {
           setApprovalsCount(apprCount)
           setOrdersCount(poCount)
         }
-        // fetch /me/ to obtain created_at (joined date)
-        try {
-          const meRes = await api.get("/me/")
-          const meData: unknown = meRes?.data
-          if (meData && typeof meData === "object") {
-            const obj = meData as Record<string, unknown>
-            if (obj.created_at && mounted) setCreatedAt(String(obj.created_at))
-          }
-        } catch (err) {
-          console.debug("profile: /me/ fetch failed", err)
-        }
       } catch (err) {
         console.error("profile: loadCounts failed", err)
       }
@@ -113,8 +121,9 @@ export default function ProfilePage() {
     }
   }, [])
   const router = useRouter()
-  const displayName = `${user.first_name} ${user.last_name}`
-  const initials = `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
+  const effectiveUser = currentUser ?? demoUser
+  const displayName = `${effectiveUser.first_name} ${effectiveUser.last_name}`
+  const initials = `${(effectiveUser.first_name || "")[0] ?? ""}${(effectiveUser.last_name || "")[0] ?? ""}`.toUpperCase()
 
   function dashboardPath(role: Role): string {
     switch (role) {
@@ -132,12 +141,12 @@ export default function ProfilePage() {
   }
 
   function goBack() {
-    router.push(dashboardPath(user.role))
+    router.push(dashboardPath(effectiveUser.role))
   }
 
   async function copyEmail() {
     try {
-      await navigator.clipboard.writeText(user.email)
+      await navigator.clipboard.writeText(effectiveUser.email)
       toast.success("Email copied to clipboard")
     } catch {
       toast.error("Unable to copy email")
@@ -185,11 +194,11 @@ export default function ProfilePage() {
               <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center text-2xl font-semibold text-slate-800 ring-1 ring-slate-200 overflow-hidden">
                 <span>{initials}</span>
               </div>
-              <div>
+                <div>
                 <h1 className="text-2xl font-semibold text-slate-900">{displayName}</h1>
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="px-2 py-1 rounded bg-slate-100 text-xs font-medium text-slate-700">{user.role.toUpperCase()}</span>
-                  <span className="text-sm text-slate-500">Member since <strong className="text-slate-700">{formatCreated(createdAt ?? user.created_at ?? null)}</strong></span>
+                  <span className="px-2 py-1 rounded bg-slate-100 text-xs font-medium text-slate-700">{effectiveUser.role.toUpperCase()}</span>
+                  <span className="text-sm text-slate-500">Member since <strong className="text-slate-700">{formatCreated(createdAt ?? effectiveUser.created_at ?? null)}</strong></span>
                 </div>
               </div>
             </div>
@@ -218,7 +227,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-slate-900">{displayName}</h2>
-              <p className="text-sm text-slate-500">{user.email}</p>
+              <p className="text-sm text-slate-500">{effectiveUser.email}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button onClick={copyEmail} className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-50 border hover:bg-slate-100 text-sm">
                   <Clipboard className="w-4 h-4" /> Copy email
@@ -240,14 +249,14 @@ export default function ProfilePage() {
                 <Mail className="w-5 h-5 text-slate-500 mt-1" />
                 <div>
                   <div className="text-xs text-slate-500">Email</div>
-                  <div className="text-sm font-medium text-slate-900">{user.email}</div>
+                  <div className="text-sm font-medium text-slate-900">{effectiveUser.email}</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <User className="w-5 h-5 text-slate-500 mt-1" />
                 <div>
                   <div className="text-xs text-slate-500">Role</div>
-                  <div className="text-sm font-medium text-slate-900">{user.role.toUpperCase()}</div>
+                  <div className="text-sm font-medium text-slate-900">{effectiveUser.role.toUpperCase()}</div>
                 </div>
               </div>
             </div>
