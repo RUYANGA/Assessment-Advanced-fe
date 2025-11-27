@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react"
 import { Trash2 } from "lucide-react"
 import { ConfirmDialog } from "./confirm-dialog"
@@ -40,6 +42,7 @@ export function DeleteButton({
       onConfirm={async () => {
         setLocalDisabled(true)
         try {
+          console.debug("DeleteButton: onConfirm invoked")
           await handleDelete()
         } finally {
           setLocalDisabled(false)
