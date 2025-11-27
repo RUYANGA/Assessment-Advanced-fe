@@ -1,7 +1,7 @@
 <!-- Quick links -->
-**Live (frontend):** https://assessment-advanced-fe.vercel.app  
-**Backend Swagger:** https://assessment-advanced-be-latest-1.onrender.com/swagger/  
-**Backend source:** https://github.com/RUYANGA/Assessment-Advanced-be
+[**Live (frontend):**](https://merciapi.lovewaylogistics.com/swagger/) https://assessment-advanced-fe.vercel.app  
+**Backend Swagger:** https://merciapi.lovewaylogistics.com/swagger/  
+**Backend source:** https://github.com/RUYANGA/Assessment-Advanced-be1
 
 # MedLink — Frontend (Next.js)
 
@@ -13,6 +13,7 @@ The frontend is deployed and available at:
 - https://assessment-advanced-fe.vercel.app
 
 ## Backend (API)
+
 - Swagger / OpenAPI documentation (backend):  
   https://merciapi.lovewaylogistics.com/swagger/
 - Backend repository (source):  
@@ -44,6 +45,7 @@ Create `.env.local` at the frontend root:
 
 ```dotenv
 NEXT_PUBLIC_API_URL=https://your-backend.example.com
+UPLOADTHINGL=https://your-uploadthing-api
 ```
 
 Set the exact backend base URL (include `/api` if your backend prefixes endpoints).
