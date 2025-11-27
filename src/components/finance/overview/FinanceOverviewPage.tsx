@@ -154,24 +154,24 @@ export default function FinanceOverviewPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-slate-100 rounded w-1/3" />
+      <div className="max-w-6xl mx-auto p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-7 bg-slate-100 rounded w-1/3" />
 
-          <section className="grid grid-cols-1 sm:grid-cols-5 gap-6">
-            <div className="h-28 p-6 bg-slate-100 rounded-lg" />
-            <div className="h-28 p-6 bg-slate-100 rounded-lg" />
-            <div className="h-28 p-6 bg-slate-100 rounded-lg" />
-            <div className="h-28 p-6 bg-slate-100 rounded-lg" />
-            <div className="h-28 p-6 bg-slate-100 rounded-lg" />
+          <section className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+            <div className="h-20 p-4 bg-slate-100 rounded-lg" />
+            <div className="h-20 p-4 bg-slate-100 rounded-lg" />
+            <div className="h-20 p-4 bg-slate-100 rounded-lg" />
+            <div className="h-20 p-4 bg-slate-100 rounded-lg" />
+            <div className="h-20 p-4 bg-slate-100 rounded-lg" />
           </section>
 
-          <section className="bg-white rounded shadow-sm p-4">
+          <section className="bg-white rounded shadow-sm p-3">
             <div className="space-y-2">
-              <div className="h-6 bg-slate-100 rounded w-1/4" />
-              <div className="h-8 bg-slate-100 rounded" />
-              <div className="h-8 bg-slate-100 rounded" />
-              <div className="h-8 bg-slate-100 rounded" />
+              <div className="h-5 bg-slate-100 rounded w-1/4" />
+              <div className="h-7 bg-slate-100 rounded" />
+              <div className="h-7 bg-slate-100 rounded" />
+              <div className="h-7 bg-slate-100 rounded" />
             </div>
           </section>
         </div>
@@ -210,7 +210,7 @@ export default function FinanceOverviewPage() {
         </div>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
         <DashboardCard
           icon={<FolderOpen className="w-7 h-7 text-slate-600" />}
           label="Requests"
@@ -242,7 +242,7 @@ export default function FinanceOverviewPage() {
         />
       </section>
 
-      <section className="bg-white rounded shadow-sm p-4">
+      <section className="bg-white rounded shadow-sm p-3">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-medium flex items-center gap-2">
             <Layers className="w-4 h-4 text-slate-600" /> Recent Finance Requests

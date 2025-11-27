@@ -129,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose, role 
       className={cn(
         "bg-white border-r shadow-sm flex flex-col z-40",
         // always fixed to the viewport; on medium+ screens keep visible (md:translate-x-0)
-        "fixed top-0 left-0 h-full w-72 min-h-screen transform transition-transform duration-200 ease-in-out",
+        "fixed top-0 left-0 h-full w-64 min-h-screen transform transition-transform duration-200 ease-in-out",
         // mobile: respect isOpen prop; desktop (md+) stays visible
         isOpen ? "translate-x-0" : "-translate-x-full",
         "md:translate-x-0"

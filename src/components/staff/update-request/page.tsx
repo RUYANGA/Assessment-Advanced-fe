@@ -71,7 +71,7 @@ export default function UpdateRequestPage({ id: propId }: { id?: string }) {
 
   if (loading) {
     return (
-      <div className="md:ml-72">
+      <div className="md:ml-64">
         <main className="min-h-screen flex items-start justify-center py-6 px-4 sm:px-6 lg:px-8">
           <div className="w-full max-w-4xl">
             <div className="animate-pulse space-y-6">
@@ -95,7 +95,7 @@ export default function UpdateRequestPage({ id: propId }: { id?: string }) {
   }
 
   return (
-    <div className="md:ml-72">
+    <div className="md:ml-64">
       <main className="min-h-screen flex items-start justify-center py-6 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-4xl">
           <Card>

@@ -37,8 +37,8 @@ export default function CreateRequestPage() {
 
   return (
     // keep responsive spacing and center card within available content area;
-    // on md+ account for fixed sidebar using md:ml-72
-    <div className="md:ml-72">
+    // on md+ account for fixed sidebar using md:ml-64
+    <div className="md:ml-64">
       <main className="min-h-screen flex items-start md:items-start justify-center py-6 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-4xl">
           <Card>

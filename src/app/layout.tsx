@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "MedLink — Frontend",
+    title: "MedLink",
     description:
       "Professional frontend for MedLink: purchase-request, approval and finance management UI.",
     url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://assessment-advanced-fe.vercel.app",
