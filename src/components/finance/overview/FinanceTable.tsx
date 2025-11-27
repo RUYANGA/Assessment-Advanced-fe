@@ -162,6 +162,8 @@ export function FinanceTable({
                           title={`Are you sure you want to delete this request?`}
                           description="This will permanently remove the approved request and its related data. This action cannot be undone."
                           handleDelete={async () => {
+                            console.debug("finance: delete triggered", r.id)
+                            const toastId = toast.loading("Deleting request...")
                             setDeletingId(r.id)
                             try {
                               const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
@@ -170,7 +172,7 @@ export function FinanceTable({
 
                               const res = await api.delete(`/purchases/requests/${r.id}/`, { headers })
                               console.debug("DELETE response", res?.status, res?.data)
-                              toast.success("Request deleted")
+                              toast.success("Request deleted", { id: toastId })
                               setOpenMenuId(null)
                               setMenuAnchor(null)
                               window.location.reload()
@@ -182,20 +184,21 @@ export function FinanceTable({
                                 const data = anyErr.response.data as any
                                 const msg = data?.detail ?? data?.message ?? JSON.stringify(data)
                                 if (status === 401) {
-                                  toast.error("Unauthorized (401). Please sign in again.")
+                                  toast.error("Unauthorized (401). Please sign in again.", { id: toastId })
                                   if (typeof window !== "undefined") localStorage.removeItem("token")
                                 } else if (typeof status === "number" && status >= 400 && status < 500) {
-                                  toast.error(`Failed to delete (status ${status}): ${String(msg)}`)
+                                  toast.error(`Failed to delete (status ${status}): ${String(msg)}`, { id: toastId })
                                 } else if (typeof status === "number") {
-                                  toast.error(`Server error (${status}). See console for details.`)
+                                  toast.error(`Server error (${status}). See console for details.`, { id: toastId })
                                 } else {
-                                  toast.error(`Failed to delete request: ${String(msg)}`)
+                                  toast.error(`Failed to delete request: ${String(msg)}`, { id: toastId })
                                 }
                               } else {
-                                toast.error(String(anyErr?.message ?? "Failed to delete request"))
+                                toast.error(String(anyErr?.message ?? "Failed to delete request"), { id: toastId })
                               }
                             } finally {
                               setDeletingId(null)
+                              toast.dismiss(toastId)
                             }
                           }}
                         />
