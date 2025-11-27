@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const baseURL =process.env.NEXT_PUBLIC_API_URL;
 
@@ -48,11 +49,18 @@ api.interceptors.response.use(
       console.warn("api error", { status, url })
     } catch (e) {}
     if (error?.response?.status === 401 && typeof window !== 'undefined') {
-      // simple handling: remove token on 401
+      // simple handling: remove token on 401 and notify user
       localStorage.removeItem('token');
       delete api.defaults.headers.common['Authorization'];
-      // optional: redirect to login
-      // window.location.href = '/login';
+      try {
+        toast.error('Session expired or unauthorized — please sign in')
+      } catch (e) {}
+      // redirect to login page after short delay so toast is visible
+      try {
+        setTimeout(() => {
+          window.location.href = '/login'
+        }, 400)
+      } catch (e) {}
     }
     return Promise.reject(error);
   }
