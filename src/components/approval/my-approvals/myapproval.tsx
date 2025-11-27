@@ -206,6 +206,34 @@ export default function Myapproval() {
           <CheckCircle className="w-4 h-4 text-emerald-600" /> My Approved
         </h3>
       </div>
+      {/* Mobile: stacked cards */}
+      <div className="md:hidden space-y-3">
+        {visible.map((r, idx) => (
+          <div key={r.id ?? `mine-${idx}`} className="bg-white border rounded-lg p-4 fade-in-up card-hover-smooth" style={{ animationDelay: `${idx * 45}ms` }}>
+            <div className="flex items-start justify-between">
+              <div className="min-w-0">
+                <div className="font-medium text-slate-800 truncate">{r.title}</div>
+                {r.description && <div className="text-xs text-slate-500 mt-1 line-clamp-2">{String(r.description)}</div>}
+                <div className="mt-2 text-sm text-slate-700 font-medium">{formatFrw(computeAmount(r))}</div>
+                <div className="mt-2 text-xs text-slate-500">{r.approved_at ? new Date(r.approved_at).toLocaleString() : (r.created_at ? new Date(r.created_at).toLocaleDateString() : "—")}</div>
+              </div>
+              <div className="ml-3 flex-shrink-0 flex flex-col items-end gap-2">
+                <button
+                  type="button"
+                  title="View request"
+                  aria-label={`View request ${r.title ?? ""}`}
+                  className="text-sm text-sky-600"
+                  onClick={() => {
+                    if (r.id) router.push(`/dashboards/approval/${r.id}/`)
+                  }}
+                >
+                  View
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm table-auto">

@@ -106,8 +106,9 @@ export default function Header({
   })()
 
   return (
-    <header className="flex items-center justify-between px-4 md:px-6 py-3 bg-white border-b sticky top-0 z-20 transition-all md:ml-72">
-      <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-20 bg-white border-b transition-all md:ml-72">
+      <div className="flex items-center justify-between w-full max-w-6xl mx-auto px-4 md:px-6 py-3">
+        <div className="flex items-center gap-4">
         <button onClick={onToggleSidebar} className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-700 hover:bg-slate-100" aria-label="Toggle sidebar">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -135,15 +136,16 @@ export default function Header({
             {loading ? "" : computedDescription}
           </p>
         </div>
-      </div>
+        </div>
 
-      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
         <div className="hidden sm:flex flex-col text-right">
           <span className="text-sm font-medium">{displayName}</span>
           <small className="text-xs text-slate-500">{displayrole}</small>
         </div>
         <div className="w-9 h-9 bg-slate-200 rounded-full flex items-center justify-center text-slate-700">
           {displayName ? displayName.split(" ").map((s) => s[0]).slice(0, 2).join("") : ""}
+        </div>
         </div>
       </div>
     </header>
