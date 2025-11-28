@@ -21,7 +21,6 @@ import {
   XCircle,
 } from "lucide-react"
 import { createPortal } from "react-dom"
-import { DeleteButton } from "@/components/deleteDialoge"
 
 export default function StaffOverviewPage() {
   const { loading, recent, stats, refresh, deleteRequest } = useStaffOverview()
@@ -137,7 +136,13 @@ export default function StaffOverviewPage() {
     setOpenMenuId(null)
     const ok = await deleteRequest(id)
     setDeletingId(null)
-    if (!ok) alert("Delete failed")
+    if (!ok) {
+      alert("Delete failed")
+      return
+    }
+    if (typeof window !== "undefined") {
+      window.location.reload()
+    }
   }
 
   // Portal menu renderer — positions a popup based on anchor rect
@@ -454,14 +459,23 @@ export default function StaffOverviewPage() {
                                   >
                                     <Edit2 className="w-4 h-4 text-slate-500" /> Edit
                                   </Link>
-                                  <DeleteButton
+                                  <button
+                                    type="button"
                                     disabled={deletingId === r.id}
-                                    title={`Are you sure you want to delete this?`}
-                                    description="This will permanently remove the request and its related data. This action cannot be undone."
-                                    handleDelete={async () => {
-                                      await deleteNow(r.id)
+                                    onClick={async () => {
+                                      try {
+                                        const confirmed = typeof window !== 'undefined' ? window.confirm("Are you sure you want to delete this request? This action cannot be undone.") : false
+                                        if (!confirmed) return
+                                        await deleteNow(r.id)
+                                      } catch (err) {
+                                        console.error('native confirm delete error', err)
+                                      }
                                     }}
-                                  />
+                                    className={`w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 ${deletingId === r.id ? 'opacity-50' : ''}`}
+                                  >
+                                    <Trash2 className="w-4 h-4 text-rose-600" />
+                                    Delete
+                                  </button>
                                 </>
                               )}
                             </div>
