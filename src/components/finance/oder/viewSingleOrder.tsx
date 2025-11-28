@@ -179,6 +179,17 @@ export default function ViewSingleOrder({ id }: { id?: number | string }) {
 
   return (
     <section className="max-w-4xl mx-auto p-6 bg-white rounded shadow-sm">
+      <div className="flex items-center justify-end mb-3">
+        <button
+          onClick={handleDelete}
+          disabled={loading}
+          className="inline-flex items-center px-3 py-1.5 border rounded text-sm gap-2 bg-rose-50 text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+          title="Delete purchase order"
+        >
+          Delete
+        </button>
+      </div>
+
       <header className="mb-4 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">{title}</h1>
