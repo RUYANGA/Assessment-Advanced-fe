@@ -52,15 +52,19 @@ export function FinanceTable({
       const headers: Record<string, string> = {}
       if (token) headers.Authorization = `Bearer ${token}`
 
-      const url = `/purchases/requests/${id}/`
-      console.debug("finance: deleting url and headers", { url, headers })
+          const url = `/purchases/requests/${id}/`
+          console.debug("finance: deleting url and headers", { url, headers })
 
-      const res = await api.delete(url, { headers })
-      console.debug("DELETE response", res?.status, res?.data)
-      setLocalRequests((prev) => prev.filter((it) => String(it.id) !== String(id)))
-      toast.success("Request deleted", { id: toastId })
-      setOpenMenuId(null)
-      setMenuAnchor(null)
+          const res = await api.delete(url, { headers })
+          console.debug("DELETE response", res?.status, res?.data)
+          setLocalRequests((prev) => prev.filter((it) => String(it.id) !== String(id)))
+          toast.success("Request deleted", { id: toastId })
+          setOpenMenuId(null)
+          setMenuAnchor(null)
+          // refresh page so all dashboards and counts stay in sync with backend
+          if (typeof window !== 'undefined') {
+            window.location.reload()
+          }
     } catch (err: unknown) {
       try {
         const anyErr = err as { response?: { status?: number; data?: unknown }; message?: string }
@@ -100,16 +104,7 @@ export function FinanceTable({
 
   return (
     <>
-      {/* Dev helper: quick-delete endpoint /purchases/requests/4/ for testing */}
-      <div className="mb-3">
-        <button
-          type="button"
-          onClick={() => performDelete(4)}
-          className="px-3 py-1 text-xs rounded bg-rose-100 text-rose-700 mr-2"
-        >
-          Dev: Delete /purchases/requests/4/
-        </button>
-      </div>
+      {/* Dev helper removed. */}
       {/* Mobile: stacked cards */}
       <div className="md:hidden space-y-3">
         {localRequests.map((r) => (
