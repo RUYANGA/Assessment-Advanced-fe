@@ -1,7 +1,7 @@
 "use client"
 import React, { useRef, useMemo, useEffect, useState, useCallback } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import createStaffService from "./services/staffService"
 import type { RequestItem, ApprovalEntry, StaffStats } from "./services/staffService"
 import {
@@ -27,7 +27,7 @@ export default function ApprovalOverviewPage() {
   // memoize service so it doesn't recreate every render (helps with hook deps)
   const svc = useMemo(() => createStaffService(), [])
 
-  const searchParams = useSearchParams()
+  // read justApproved from window location when needed (avoid useSearchParams to prevent CSR bailout during prerender)
 
   // track mounted state so load() can avoid setting state on unmounted component
   const mountedRef = useRef(true)
@@ -120,7 +120,7 @@ export default function ApprovalOverviewPage() {
   // If we were redirected back to this page with ?justApproved=<id>, fetch that request
   // and ensure it appears in `mine` so the approver sees what they just approved.
   useEffect(() => {
-    const justApproved = searchParams?.get?.("justApproved")
+    const justApproved = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("justApproved") : null
     if (!justApproved) return
     let cancelled = false
 
@@ -147,7 +147,7 @@ export default function ApprovalOverviewPage() {
     return () => {
       cancelled = true
     }
-  }, [searchParams, svc])
+  }, [svc])
 
   const tableRef = useRef<HTMLDivElement | null>(null)
   const router = useRouter()
