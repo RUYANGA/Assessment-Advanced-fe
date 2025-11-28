@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
@@ -180,7 +180,17 @@ export default function ViewSingleOrder({ id }: { id?: number | string }) {
 
   return (
     <section className="max-w-4xl mx-auto p-6 bg-white rounded shadow-sm">
-      <div className="flex items-center justify-end mb-3">
+      <div className="flex items-center justify-end mb-3 gap-2">
+        <button
+          onClick={() => router.push("/dashboards/finance/order")}
+          className="inline-flex items-center px-3 py-1.5 border rounded text-sm gap-2 bg-white text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          title="Back to orders"
+          aria-label="Back to all orders"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Back</span>
+        </button>
+
         <button
           onClick={handleDelete}
           disabled={loading}
