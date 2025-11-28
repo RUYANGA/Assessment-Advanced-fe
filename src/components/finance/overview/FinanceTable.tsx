@@ -100,7 +100,7 @@ export function FinanceTable({
   }
 
   // Inline simple modal confirm (self-contained) to avoid external dialog issues
-  function ConfirmModal({ id, title, description, onConfirm, onCancel }: { id: number | string; title?: string; description?: string; onConfirm: () => void; onCancel: () => void }) {
+  function ConfirmModal({ id, title, description, onCancel, onConfirm }: { id: number | string; title?: string; description?: string; onCancel: () => void; onConfirm?: () => Promise<void> | void }) {
     if (typeof document === "undefined") return null
     return createPortal(
       <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={onCancel}>
@@ -120,10 +120,15 @@ export function FinanceTable({
                 e.stopPropagation()
                 try {
                   console.debug("ConfirmModal: delete click", { id })
-                  // ensure any promise returned by onConfirm is handled
-                  await Promise.resolve(onConfirm())
+                  // prefer caller-provided onConfirm when available, otherwise use performDelete
+                  if (typeof onConfirm === "function") {
+                    await Promise.resolve(onConfirm())
+                  } else {
+                    await performDelete(id)
+                  }
+                  onCancel()
                 } catch (err) {
-                  console.error("ConfirmModal: onConfirm error", err)
+                  console.error("ConfirmModal: onConfirm/performDelete error", err)
                 }
               }}
               type="button"
