@@ -1,5 +1,4 @@
 "use client"
-"use client"
 import React, { useRef, useMemo, useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -133,6 +132,17 @@ export default function ApprovalOverviewPage() {
   const myRejectedCount = useMemo(() => {
     return Array.isArray(rejectedMine) ? rejectedMine.length : 0
   }, [rejectedMine])
+
+  // approvals/rejections by current approver
+  const mineApproved = useMemo(() => {
+    return Array.isArray(mine) ? mine.filter((x) => String(x?.status ?? "").toUpperCase() === "APPROVED") : []
+  }, [mine])
+
+  const mineRejected = useMemo(() => {
+    // prefer explicit rejectedMine entries if present, otherwise derive from `mine`
+    if (Array.isArray(rejectedMine) && rejectedMine.length) return rejectedMine
+    return Array.isArray(mine) ? mine.filter((x) => String(x?.status ?? "").toUpperCase() === "REJECTED") : []
+  }, [mine, rejectedMine])
 
   // total requests = pending (for approver) + my approved + my rejected
   const totalRequests = useMemo(() => {
@@ -396,6 +406,56 @@ export default function ApprovalOverviewPage() {
           </div>
         </div>
         
+      </section>
+
+      {/* My approvals / rejections preview */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white rounded shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">Approved by me</h3>
+            <div className="text-xs text-slate-500">{mineApproved.length}</div>
+          </div>
+
+          {mineApproved.length === 0 ? (
+            <div className="text-sm text-slate-500">No approvals yet.</div>
+          ) : (
+            <ul className="space-y-2">
+              {mineApproved.slice(0, 6).map((r) => (
+                <li key={String(r.id)} className="flex items-center justify-between text-sm">
+                  <button onClick={() => router.push(`/dashboards/approval/${String(r.id)}`)} className="text-left truncate text-slate-700">
+                    {r.title ?? `Request ${r.id}`}
+                  </button>
+                  <div className="text-slate-500 ml-3">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="bg-white rounded shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">Rejected by me</h3>
+            <div className="text-xs text-slate-500">{mineRejected.length}</div>
+          </div>
+
+          {mineRejected.length === 0 ? (
+            <div className="text-sm text-slate-500">No rejections yet.</div>
+          ) : (
+            <ul className="space-y-2">
+              {mineRejected.slice(0, 6).map((r) => {
+                const rec = (r as unknown) as RequestItem
+                return (
+                  <li key={String(rec.id ?? (r as any).id)} className="flex items-center justify-between text-sm">
+                    <button onClick={() => router.push(`/dashboards/approval/${String(rec.id ?? (r as any).id)}`)} className="text-left truncate text-slate-700">
+                      {rec.title ?? `Request ${rec.id ?? (r as any).id}`}
+                    </button>
+                    <div className="text-slate-500 ml-3">{rec.created_at ? new Date(rec.created_at).toLocaleDateString() : "—"}</div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
       </section>
 
       <section className="bg-white rounded shadow-sm p-4">
