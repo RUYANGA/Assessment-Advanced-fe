@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-import { createPortal } from "react-dom"
 import Link from "next/link"
 import {
   MoreHorizontal,
@@ -16,7 +15,6 @@ import {
 import { FinanceRequest,formatFrwCompact} from "./FinanceOverviewPage"
 import toast from "react-hot-toast"
 import api from "@/lib/api"
-import { ConfirmDialog } from "@/components/confirm-dialog"
 
 type FinanceTableProps = {
   requests: FinanceRequest[]
@@ -39,7 +37,6 @@ export function FinanceTable({
 }: FinanceTableProps) {
   const [deletingId, setDeletingId] = React.useState<number | string | null>(null)
   const [localRequests, setLocalRequests] = React.useState<FinanceRequest[]>(requests ?? [])
-  const [confirmOpenId, setConfirmOpenId] = React.useState<number | string | null>(null)
 
   React.useEffect(() => {
     setLocalRequests(requests ?? [])
@@ -99,49 +96,7 @@ export function FinanceTable({
     }
   }
 
-  // Inline simple modal confirm (self-contained) to avoid external dialog issues
-  function ConfirmModal({ id, title, description, onCancel, onConfirm }: { id: number | string; title?: string; description?: string; onCancel: () => void; onConfirm?: () => Promise<void> | void }) {
-    if (typeof document === "undefined") return null
-    return createPortal(
-      <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={onCancel}>
-        <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
-          <div className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="min-w-0">
-                <h3 className="text-lg font-semibold text-slate-900">{title ?? "Confirm delete"}</h3>
-                {description ? <p className="mt-2 text-sm text-slate-600">{description}</p> : null}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-slate-50">
-            <button onClick={onCancel} type="button" className="px-4 py-2 rounded-md border bg-white text-sm text-slate-700 hover:bg-slate-100">Cancel</button>
-            <button
-              onClick={async (e) => {
-                e.stopPropagation()
-                try {
-                  console.debug("ConfirmModal: delete click", { id })
-                  // prefer caller-provided onConfirm when available, otherwise use performDelete
-                  if (typeof onConfirm === "function") {
-                    await Promise.resolve(onConfirm())
-                  } else {
-                    await performDelete(id)
-                  }
-                  onCancel()
-                } catch (err) {
-                  console.error("ConfirmModal: onConfirm/performDelete error", err)
-                }
-              }}
-              type="button"
-              className="px-4 py-2 rounded-md bg-rose-600 text-white text-sm hover:bg-rose-700"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>,
-      document.body
-    )
-  }
+  // Using native browser `confirm()` for deletion. This keeps behavior simple and reliable across environments.
 
   return (
     <>
@@ -281,9 +236,15 @@ export function FinanceTable({
                           <button
                             type="button"
                             disabled={deletingId === r.id}
-                            onClick={() => {
-                              console.debug("FinanceTable: open confirm for id", r.id)
-                              setConfirmOpenId(r.id)
+                            onClick={async () => {
+                              try {
+                                console.debug("FinanceTable: native confirm for id", r.id)
+                                const confirmed = typeof window !== "undefined" ? window.confirm("Are you sure you want to delete this request? This action cannot be undone.") : false
+                                if (!confirmed) return
+                                await performDelete(r.id)
+                              } catch (err) {
+                                console.error("native confirm delete error", err)
+                              }
                             }}
                             className={`px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 rounded ${deletingId === r.id ? "opacity-50" : ""}`}
                             aria-disabled={deletingId === r.id}
@@ -293,18 +254,6 @@ export function FinanceTable({
                               <span>Delete</span>
                             </span>
                           </button>
-                          {confirmOpenId === r.id && (
-                            <ConfirmModal
-                              id={r.id}
-                              title={`Are you sure you want to delete this?`}
-                              description="This will permanently remove the approved request and its related data. This action cannot be undone."
-                              onCancel={() => setConfirmOpenId(null)}
-                              onConfirm={async () => {
-                                setConfirmOpenId(null)
-                                await performDelete(r.id)
-                              }}
-                            />
-                          )}
                         </>
                       )}
                      
