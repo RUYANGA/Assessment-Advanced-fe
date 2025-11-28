@@ -425,59 +425,63 @@ export default function StaffOverviewPage() {
                               >
                                 <Eye className="w-4 h-4 text-slate-500" /> View
                               </Link>
-                              {r.status === "APPROVED" ? (
-                                <>
-                                  <div
-                                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400 cursor-not-allowed"
-                                    title="Cannot edit an approved request"
-                                    aria-disabled="true"
-                                    tabIndex={-1}
-                                    role="button"
-                                  >
-                                    <Edit2 className="w-4 h-4 text-slate-400" /> Edit
-                                  </div>
-                                  <button
-                                    disabled
-                                    className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-slate-400 cursor-not-allowed"
-                                    title="Cannot delete an approved request"
-                                    aria-disabled="true"
-                                    tabIndex={-1}
-                                  >
-                                    <Trash2 className="w-4 h-4 text-slate-400" />
-                                    Delete
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <Link
-                                    href={`/dashboards/staff/edit/${r.id}`}
-                                    onClick={() => {
-                                      setOpenMenuId(null)
-                                      setMenuAnchor(null)
-                                    }}
-                                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-                                  >
-                                    <Edit2 className="w-4 h-4 text-slate-500" /> Edit
-                                  </Link>
-                                  <button
-                                    type="button"
-                                    disabled={deletingId === r.id}
-                                    onClick={async () => {
-                                      try {
-                                        const confirmed = typeof window !== 'undefined' ? window.confirm("Are you sure you want to delete this request? This action cannot be undone.") : false
-                                        if (!confirmed) return
-                                        await deleteNow(r.id)
-                                      } catch (err) {
-                                        console.error('native confirm delete error', err)
-                                      }
-                                    }}
-                                    className={`w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 ${deletingId === r.id ? 'opacity-50' : ''}`}
-                                  >
-                                    <Trash2 className="w-4 h-4 text-rose-600" />
-                                    Delete
-                                  </button>
-                                </>
-                              )}
+                              {(() => {
+                                const statusNormalized = String(r.status ?? "").toUpperCase()
+                                const isFinal = statusNormalized === "APPROVED" || statusNormalized === "REJECTED"
+                                return isFinal ? (
+                                  <>
+                                    <div
+                                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400 cursor-not-allowed"
+                                      title="Cannot edit a finalized request"
+                                      aria-disabled="true"
+                                      tabIndex={-1}
+                                      role="button"
+                                    >
+                                      <Edit2 className="w-4 h-4 text-slate-400" /> Edit
+                                    </div>
+                                    <button
+                                      disabled
+                                      className="w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-slate-400 cursor-not-allowed"
+                                      title="Cannot delete a finalized request"
+                                      aria-disabled="true"
+                                      tabIndex={-1}
+                                    >
+                                      <Trash2 className="w-4 h-4 text-slate-400" />
+                                      Delete
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Link
+                                      href={`/dashboards/staff/edit/${r.id}`}
+                                      onClick={() => {
+                                        setOpenMenuId(null)
+                                        setMenuAnchor(null)
+                                      }}
+                                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                                    >
+                                      <Edit2 className="w-4 h-4 text-slate-500" /> Edit
+                                    </Link>
+                                    <button
+                                      type="button"
+                                      disabled={deletingId === r.id}
+                                      onClick={async () => {
+                                        try {
+                                          const confirmed = typeof window !== 'undefined' ? window.confirm("Are you sure you want to delete this request? This action cannot be undone.") : false
+                                          if (!confirmed) return
+                                          await deleteNow(r.id)
+                                        } catch (err) {
+                                          console.error('native confirm delete error', err)
+                                        }
+                                      }}
+                                      className={`w-full flex items-center gap-2 text-left px-3 py-2 text-sm text-rose-600 hover:bg-slate-50 ${deletingId === r.id ? 'opacity-50' : ''}`}
+                                    >
+                                      <Trash2 className="w-4 h-4 text-rose-600" />
+                                      Delete
+                                    </button>
+                                  </>
+                                )
+                              })()}
                             </div>
                           </PopupMenu>
                         )}
