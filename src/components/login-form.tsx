@@ -55,6 +55,38 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     setEmail(creds.email);
     setPassword(creds.password);
     toast.success(`Applied demo credentials: ${role}`);
+    // auto-login with demo credentials
+    void loginWithCreds(creds.email, creds.password)
+  }
+
+  async function loginWithCreds(emailArg: string, passwordArg: string) {
+    if (loading) return
+    setLoading(true)
+    try {
+      const res = await api.post("/auth/token/", { email: emailArg, password: passwordArg })
+      const token = res?.data?.access ?? res?.data?.refresh
+      if (!token) throw new Error("Authentication token not provided by server")
+
+      setAuthToken(token)
+
+      const meRes = await api.get("/me/", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const role = String(meRes?.data?.role ?? "").toLowerCase()
+
+      const destination = ROLE_REDIRECT[role]
+      if (destination) {
+        toast.success("Login successful")
+        router.replace(destination)
+      } else {
+        toast("Login succeeded but your role is not permitted here")
+      }
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err)
+      toast.error(message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   function extractErrorMessage(err: unknown): string {
@@ -73,35 +105,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
-    setLoading(true);
-
-    try {
-      const res = await api.post("/auth/token/", { email, password });
-      const token = res?.data?.access ?? res?.data?.refresh;
-      if (!token) throw new Error("Authentication token not provided by server");
-
-      // set token in client helper (persists to localStorage)
-      setAuthToken(token);
-
-      const meRes = await api.get("/me/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const role = String(meRes?.data?.role ?? "").toLowerCase();
-
-      const destination = ROLE_REDIRECT[role];
-      if (destination) {
-        toast.success("Login successful");
-        // replace prevents back-navigation to login
-        router.replace(destination);
-      } else {
-        toast("Login succeeded but your role is not permitted here");
-      }
-    } catch (err: unknown) {
-      const message = extractErrorMessage(err);
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+    // use shared login routine so demo selector can call it too
+    await loginWithCreds(email, password)
   }
 
   return (
@@ -135,18 +140,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     <option value="approver2">Approver Level 2 Role</option>
                     <option value="clear">Clear</option>
                   </select>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setEmail("");
-                      setPassword("");
-                      toast("Fields cleared");
-                    }}
-                  >
-                    Clear
-                  </Button>
                 </div>
               </Field>
 
